@@ -10,6 +10,7 @@ import UIKit
 import Foundation
 import CoreGraphics
 
+
 class GridView: UIView {
     let X_OFF = 10
     let Y_OFF = 20
@@ -23,16 +24,19 @@ class GridView: UIView {
 
     var mRadius = 0
     var mCenterX = 0
-    var mCenterY = 9
+    var mCenterY = 0
     var mW = 0
     var mH = 0
 
+    var showBallTimer: Timer? = nil
+    var showNewBallAlpha: UInt32 = 0
+    var showNewBallInProgress = false
     var newBallCount = 0
 
     private var balls: [Ball] = []
     var newBallIndex: [Int] = []
 
-    private struct Ball {
+    private struct Ball: Equatable {
         var color: Int
         var score: Int
 
@@ -44,12 +48,18 @@ class GridView: UIView {
 
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
+    //var aalpha = 0x00000000
     override func draw(_ rect: CGRect) {
         super.draw(rect)
+        setNeedsDisplay()
         // Drawing code
         drawGrid()
         drawBalls(rect)
-        //drawBall(x: X_OFF, y: Y_OFF, score: 0, color_code: 4, alpha: 1, rect: rect)
+        if isGameOver() {
+            parentViewController!.present(GameOverViewController(), animated: true, completion: nil)
+        }
+        //drawBall(x: X_OFF, y: Y_OFF, score: 0, color_code: 4, alpha: 0xff000000, rect: rect)
+        //showBallTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(run), userInfo: nil, repeats: true)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -62,12 +72,12 @@ class GridView: UIView {
 
         var rdmNumbers: Set<Int> = []
         while rdmNumbers.count < START_NUM {
-            rdmNumbers.insert(Int(arc4random_uniform(UInt32(balls.count))))
+            rdmNumbers.insert(Int(arc4random_uniform(UInt32(UInt32(balls.count)))))
         }
 
         /*for i in 0...balls.count - 1 {
-            print(balls[i].color)
-        }*/
+         print(balls[i].color)
+         }*/
         let startColors = [1, 2, 4]
         for rdm in rdmNumbers {
             balls[rdm].color = startColors[Int(arc4random_uniform(3))]
@@ -76,10 +86,39 @@ class GridView: UIView {
         }
 
         /*for i in 0...balls.count - 1 {
-            print(balls[i].color)
-        }*/
+         print(balls[i].color)
+         }*/
 
 
+    }
+
+    func isGameOver() -> Bool {
+        for i in 0...balls.count - 2 {
+            if balls[i].color == 0 {
+                return false
+            }
+
+            var belowColor = 0
+            var rightColor = 0
+
+            if !((i + COLUMNS) >= balls.count) {
+                belowColor = balls[i + COLUMNS].color
+            }
+            if ((i / COLUMNS) == ((i + 1) / COLUMNS)) && ((i + 1) < balls.count) {
+                rightColor = balls[i + 1].color
+            }
+
+            if isSingleColor(balls[i].color) {
+                if ((belowColor & balls[i].color) > 0) && ((rightColor & balls[i].color) > 0) { return false }
+            } else {
+                for color in [belowColor, rightColor] {
+                    if isSingleColor(color) {
+                        if (color & balls[i].color) > 0 { return false }
+                    } else if color == balls[i].color { return false }
+                }
+            }
+        }
+        return true
     }
 
     func setUpGestures() {
@@ -137,7 +176,7 @@ class GridView: UIView {
         }
 
         addRandomBall()
-        layoutSubviews()
+        setNeedsDisplay()
     }
 
     @objc func onSwipeRight() {
@@ -176,7 +215,7 @@ class GridView: UIView {
         }
 
         addRandomBall()
-        layoutSubviews()
+        setNeedsDisplay()
     }
 
     @objc func onSwipeTop() {
@@ -215,7 +254,7 @@ class GridView: UIView {
         }
 
         addRandomBall()
-        layoutSubviews()
+        setNeedsDisplay()
     }
 
     @objc func onSwipeBottom() {
@@ -253,7 +292,7 @@ class GridView: UIView {
         }
 
         addRandomBall()
-        layoutSubviews()
+        setNeedsDisplay()
     }
 
     func isSingleColor(_ color_code: Int) -> Bool {
@@ -286,9 +325,8 @@ class GridView: UIView {
             print(position.y)
         }
     }
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        setNeedsDisplay()
+    override func setNeedsDisplay() {
+        super.setNeedsDisplay()
 
         setSizeVars()
     }
@@ -311,13 +349,13 @@ class GridView: UIView {
 
         for _ in 0...ROWS {
             path.move(to: CGPoint(x: X_OFF, y: y))
-            path.addLine(to: CGPoint(x: mW - X_OFF, y: y))
+            path.addLine(to: CGPoint(x: mW - X_OFF - 3, y: y))
             y += y_stride
         }
 
         for _ in 0...COLUMNS {
             path.move(to: CGPoint(x: x, y: Y_OFF))
-            path.addLine(to: CGPoint(x: x, y: mH - Y_OFF))
+            path.addLine(to: CGPoint(x: x, y: mH - Y_OFF - 3))
             x += x_stride
         }
 
@@ -327,10 +365,10 @@ class GridView: UIView {
     }
 
     let PADDING = 5
-    func drawBall(x: Int, y: Int, score: Int, color_code: Int, alpha: Int, rect: CGRect) {
+    func drawBall(x: Int, y: Int, score: Int, color_code: Int, alpha: UInt32, rect: CGRect) {
         if color_code == 0 { return }
 
-        var color: [Int] = [alpha, alpha, alpha]
+        var color: [UInt32] = [alpha, alpha, alpha]
         var colors = 0
 
         if ((color_code & 1) == 1) {
@@ -352,7 +390,7 @@ class GridView: UIView {
         let yy_stride = y_stride - 2 * PADDING
 
         let textAttributes = [
-            NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H)),
+            NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
             NSAttributedStringKey.foregroundColor : UIColor.white
         ]
         var path = UIBezierPath()
@@ -363,8 +401,7 @@ class GridView: UIView {
             path.fill()
 
             let text_width = Int(String(score).size(withAttributes: textAttributes).width)
-            let text_height = Int(String(score).size(withAttributes: textAttributes).height)
-            String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 2), withAttributes: textAttributes)
+            String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
         } else if (colors == 2) {
             path = UIBezierPath(rect: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 2))
             UIColor(hex: color[0]).set()
@@ -394,10 +431,18 @@ class GridView: UIView {
     }
 
     func drawBalls(_ rect: CGRect) {
-        var alpha = 0xff000000
+        var alpha: UInt32 = 0xff000000
         for ii in 0...((ROWS * COLUMNS) - 1) {
             alpha = 0xff000000
             if balls[ii].color == 0 { continue }
+            if showNewBallInProgress && (newBallCount > 0) {
+                for jj in 0...newBallCount - 1 {
+                    if newBallIndex[jj] == ii {
+                        alpha = showNewBallAlpha << 24
+                        break
+                    }
+                }
+            }
             drawBall(x: X_OFF + (ii % COLUMNS) * x_stride, y: Y_OFF + ((ii / COLUMNS) % ROWS) * y_stride, score: balls[ii].score, color_code: balls[ii].color, alpha: alpha, rect: rect)
         }
     }
@@ -435,16 +480,47 @@ class GridView: UIView {
         }
 
         newBallCount = count
+        showNewBallAlpha = 0
+        showNewBallInProgress = true
+        showBallTimer = nil
+        showBallTimer = Timer.scheduledTimer(timeInterval: 0.015, target: self, selector: #selector(run), userInfo: nil, repeats: true)
+    }
+
+    @objc func run() {
+        showNewBallAlpha += 5
+        if showNewBallAlpha > 0xff {
+            showNewBallAlpha = 0xff
+            showBallTimer?.invalidate()
+            showBallTimer = nil
+            showNewBallInProgress = false
+        }
+        setNeedsDisplay()
     }
 }
 
 extension UIColor {
-    convenience init(hex: Int) {
-        let components = (
-            R: CGFloat((hex >> 16) & 0xff) / 255,
-            G: CGFloat((hex >> 08) & 0xff) / 255,
-            B: CGFloat((hex >> 00) & 0xff) / 255
-        )
-        self.init(red: components.R, green: components.G, blue: components.B, alpha: 1)
+    public convenience init(hex: UInt32) {
+        let r, g, b: CGFloat
+        var a: CGFloat
+
+        a = CGFloat((hex & 0xff000000) >> 24) / 255
+        r = CGFloat((hex & 0x00ff0000) >> 16) / 255
+        g = CGFloat((hex & 0x0000ff00) >> 8) / 255
+        b = CGFloat(hex & 0x000000ff) / 255
+
+        self.init(red: r, green: g, blue: b, alpha: a)
+    }
+}
+
+extension UIView {
+    var parentViewController: UIViewController? {
+        var parentResponder: UIResponder? = self
+        while parentResponder != nil {
+            parentResponder = parentResponder!.next
+            if let viewController = parentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
     }
 }
