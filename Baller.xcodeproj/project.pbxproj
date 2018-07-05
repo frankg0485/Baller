@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01C5D1A620EAE27C002EF02D /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C5D1A520EAE27C002EF02D /* GameOverViewController.swift */; };
 		01E6C8AF20D085A500C587ED /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E6C8AE20D085A500C587ED /* AppDelegate.swift */; };
 		01E6C8B120D085A500C587ED /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E6C8B020D085A500C587ED /* ViewController.swift */; };
 		01E6C8B420D085A500C587ED /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 01E6C8B220D085A500C587ED /* Main.storyboard */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01C5D1A520EAE27C002EF02D /* GameOverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverViewController.swift; sourceTree = "<group>"; };
 		01E6C8AB20D085A500C587ED /* Baller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Baller.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		01E6C8AE20D085A500C587ED /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		01E6C8B020D085A500C587ED /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				01E6C8AE20D085A500C587ED /* AppDelegate.swift */,
 				01E6C8DC20D088C800C587ED /* GridView.swift */,
 				01E6C8B020D085A500C587ED /* ViewController.swift */,
+				01C5D1A520EAE27C002EF02D /* GameOverViewController.swift */,
 				01E6C8B220D085A500C587ED /* Main.storyboard */,
 				01E6C8B520D085A500C587ED /* Assets.xcassets */,
 				01E6C8B720D085A500C587ED /* LaunchScreen.storyboard */,
@@ -259,6 +262,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01C5D1A620EAE27C002EF02D /* GameOverViewController.swift in Sources */,
 				01E6C8B120D085A500C587ED /* ViewController.swift in Sources */,
 				01E6C8DD20D088C800C587ED /* GridView.swift in Sources */,
 				01E6C8AF20D085A500C587ED /* AppDelegate.swift in Sources */,
