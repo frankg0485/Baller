@@ -15,7 +15,7 @@ class GridView: UIView {
     let X_OFF = 10
     let Y_OFF = 20
     let COLUMNS = 4
-    let ROWS = 5
+    let ROWS = 4
     let MAX_NEW_BALLS = 2
     let START_NUM = 4
     let FONT_H = 60
@@ -395,7 +395,7 @@ class GridView: UIView {
         ]
         var path = UIBezierPath()
         if colors == 1 {
-            path = UIBezierPath(rect: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
+            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
             UIColor(hex: color[0]).set()
             path.stroke()
             path.fill()
@@ -403,27 +403,27 @@ class GridView: UIView {
             let text_width = Int(String(score).size(withAttributes: textAttributes).width)
             String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
         } else if (colors == 2) {
-            path = UIBezierPath(rect: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 2))
+            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 2))
             UIColor(hex: color[0]).set()
             path.stroke()
             path.fill()
 
-            path = UIBezierPath(rect: CGRect(x: xx, y: yy + yy_stride / 2, width: xx_stride, height: yy_stride / 2))
+            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy + yy_stride / 2, width: xx_stride, height: yy_stride / 2))
             UIColor(hex: color[1]).set()
             path.stroke()
             path.fill()
         } else {
-            path = UIBezierPath(rect: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 3))
+            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 3))
             UIColor(hex: color[0]).set()
             path.stroke()
             path.fill()
 
-            path = UIBezierPath(rect: CGRect(x: xx, y: yy + yy_stride / 3, width: xx_stride, height: yy_stride / 3))
+            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy + yy_stride / 3, width: xx_stride, height: yy_stride / 3))
             UIColor(hex: color[1]).set()
             path.stroke()
             path.fill()
 
-            path = UIBezierPath(rect: CGRect(x: xx, y: yy + yy_stride * 2 / 3, width: xx_stride, height: yy_stride / 3))
+            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy + yy_stride * 2 / 3, width: xx_stride, height: yy_stride / 3))
             UIColor(hex: color[2]).set()
             path.stroke()
             path.fill()
