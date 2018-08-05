@@ -12,21 +12,21 @@ import CoreGraphics
 
 
 class GridView: UIView {
-    let X_OFF = 10
-    let Y_OFF = 20
+    let X_OFF: Double = 10
+    let Y_OFF: Double = 10
     let COLUMNS = 4
     let ROWS = 4
     let MAX_NEW_BALLS = 2
     let START_NUM = 4
     let FONT_H = 60
-    var x_stride = 0
-    var y_stride = 0
+    var x_stride: Double = 0
+    var y_stride: Double = 0
 
-    var mRadius = 0
-    var mCenterX = 0
-    var mCenterY = 0
-    var mW = 0
-    var mH = 0
+    var mRadius: Double = 0
+    var mCenterX: Double = 0
+    var mCenterY: Double = 0
+    var mW: Double = 0
+    var mH: Double = 0
 
     var showBallTimer: Timer? = nil
     var showNewBallAlpha: UInt32 = 0
@@ -51,10 +51,17 @@ class GridView: UIView {
     //var aalpha = 0x00000000
     override func draw(_ rect: CGRect) {
         super.draw(rect)
-        setNeedsDisplay()
+        //setNeedsDisplay()
         // Drawing code
+        print(self.frame.maxX)
+        print(self.frame.minX)
+        print(self.frame.maxY)
+        print(self.frame.minY)
+        print(rect.maxX)
+        print(rect.minX)
+        print(self.frame.width)
         drawGrid()
-        drawBalls(rect)
+        drawBalls()
         if isGameOver() {
             parentViewController!.present(GameOverViewController(), animated: true, completion: nil)
         }
@@ -109,7 +116,7 @@ class GridView: UIView {
             }
 
             if isSingleColor(balls[i].color) {
-                if ((belowColor & balls[i].color) > 0) && ((rightColor & balls[i].color) > 0) { return false }
+                if ((belowColor & balls[i].color) > 0) || ((rightColor & balls[i].color) > 0) { return false }
             } else {
                 for color in [belowColor, rightColor] {
                     if isSingleColor(color) {
@@ -332,30 +339,28 @@ class GridView: UIView {
     }
 
     func setSizeVars() {
-        mW = Int(self.frame.width)
-        mH = Int(self.frame.height)
-        mCenterX = Int(self.frame.width) / 2
-        mCenterY = Int(self.frame.height) / 2
+        mW = Double(self.frame.width)
+        mH = Double(self.frame.height)
     }
 
     func drawGrid() {
-        x_stride = (mW - 2 * X_OFF) / COLUMNS
-        y_stride = (mH - 2 * Y_OFF) / ROWS
+        x_stride = Double((mW - 2 * X_OFF) / Double(COLUMNS))
+        y_stride = Double((mH - 2 * Y_OFF) / Double(ROWS))
 
-        var x = X_OFF
-        var y = Y_OFF
+        var x: Double = X_OFF
+        var y: Double = Y_OFF
 
         let path = UIBezierPath()
 
         for _ in 0...ROWS {
             path.move(to: CGPoint(x: X_OFF, y: y))
-            path.addLine(to: CGPoint(x: mW - X_OFF - 3, y: y))
+            path.addLine(to: CGPoint(x: mW - X_OFF, y: y))
             y += y_stride
         }
 
         for _ in 0...COLUMNS {
             path.move(to: CGPoint(x: x, y: Y_OFF))
-            path.addLine(to: CGPoint(x: x, y: mH - Y_OFF - 3))
+            path.addLine(to: CGPoint(x: x, y: mH - Y_OFF))
             x += x_stride
         }
 
@@ -365,7 +370,7 @@ class GridView: UIView {
     }
 
     let PADDING = 5
-    func drawBall(x: Int, y: Int, score: Int, color_code: Int, alpha: UInt32, rect: CGRect) {
+    func drawBall(x: Int, y: Int, score: Int, color_code: Int, alpha: UInt32) {
         if color_code == 0 { return }
 
         var color: [UInt32] = [alpha, alpha, alpha]
@@ -386,24 +391,38 @@ class GridView: UIView {
 
         let xx = x + PADDING
         let yy = y + PADDING
-        let xx_stride = x_stride - 2 * PADDING
-        let yy_stride = y_stride - 2 * PADDING
+        let xx_stride = Int(x_stride) - 2 * PADDING
+        let yy_stride = Int(y_stride) - 2 * PADDING
 
         let textAttributes = [
             NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
             NSAttributedStringKey.foregroundColor : UIColor.white
         ]
-        var path = UIBezierPath()
+
+        let center = CGPoint(x: xx + xx_stride / 2, y: yy + yy_stride / 2)
+        let radius = CGFloat(xx_stride / 2)
         if colors == 1 {
-            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
+            var arc = UIBezierPath()
+            arc = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
             UIColor(hex: color[0]).set()
-            path.stroke()
-            path.fill()
+            arc.stroke()
+            arc.fill()
 
             let text_width = Int(String(score).size(withAttributes: textAttributes).width)
             String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
         } else if (colors == 2) {
-            path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 2))
+            let arc1 = UIBezierPath()
+            arc1.addArc(withCenter: center, radius: radius, startAngle: CGFloat.pi / 2, endAngle: 3 * CGFloat.pi / 2, clockwise: true)
+            arc1.close()
+            UIColor(hex: color[0]).set()
+            arc1.fill()
+
+            let arc2 = UIBezierPath()
+            arc2.addArc(withCenter: center, radius: radius, startAngle: 3 * CGFloat.pi / 2, endAngle: 5 * CGFloat.pi / 2, clockwise: true)
+            arc2.close()
+            UIColor(hex: color[1]).set()
+            arc2.fill()
+            /*path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 2))
             UIColor(hex: color[0]).set()
             path.stroke()
             path.fill()
@@ -411,8 +430,29 @@ class GridView: UIView {
             path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy + yy_stride / 2, width: xx_stride, height: yy_stride / 2))
             UIColor(hex: color[1]).set()
             path.stroke()
-            path.fill()
+            path.fill()*/
         } else {
+            let arc1 = UIBezierPath()
+            arc1.addArc(withCenter: center, radius: radius, startAngle: CGFloat.pi / 6, endAngle: 5 * CGFloat.pi / 6, clockwise: true)
+            arc1.addLine(to: center)
+            arc1.close()
+            UIColor(hex: color[0]).set()
+            arc1.fill()
+
+            let arc2 = UIBezierPath()
+            arc2.addArc(withCenter: center, radius: radius, startAngle: 5 * CGFloat.pi / 6, endAngle: 3 * CGFloat.pi / 2, clockwise: true)
+            arc2.addLine(to: center)
+            arc2.close()
+            UIColor(hex: color[1]).set()
+            arc2.fill()
+
+            let arc3 = UIBezierPath()
+            arc3.addArc(withCenter: center, radius: radius, startAngle: 3 * CGFloat.pi / 2, endAngle: CGFloat.pi / 6, clockwise: true)
+            arc3.addLine(to: center)
+            arc3.close()
+            UIColor(hex: color[2]).set()
+            arc3.fill()
+            /*
             path = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride / 3))
             UIColor(hex: color[0]).set()
             path.stroke()
@@ -427,10 +467,11 @@ class GridView: UIView {
             UIColor(hex: color[2]).set()
             path.stroke()
             path.fill()
+            */
         }
     }
 
-    func drawBalls(_ rect: CGRect) {
+    func drawBalls() {
         var alpha: UInt32 = 0xff000000
         for ii in 0...((ROWS * COLUMNS) - 1) {
             alpha = 0xff000000
@@ -443,7 +484,7 @@ class GridView: UIView {
                     }
                 }
             }
-            drawBall(x: X_OFF + (ii % COLUMNS) * x_stride, y: Y_OFF + ((ii / COLUMNS) % ROWS) * y_stride, score: balls[ii].score, color_code: balls[ii].color, alpha: alpha, rect: rect)
+            drawBall(x: Int(X_OFF) + (ii % COLUMNS) * Int(x_stride), y: Int(Y_OFF) + ((ii / COLUMNS) % ROWS) * Int(y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)
         }
     }
 
