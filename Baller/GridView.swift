@@ -18,7 +18,7 @@ class GridView: UIView {
     let ROWS = 4
     let MAX_NEW_BALLS = 2
     let START_NUM = 4
-    let FONT_H = 60
+    let FONT_H: Double = 60
     var x_stride: Double = 0
     var y_stride: Double = 0
 
@@ -35,6 +35,8 @@ class GridView: UIView {
 
     private var balls: [Ball] = []
     var newBallIndex: [Int] = []
+
+    var once = false
 
     private struct Ball: Equatable {
         var color: Int
@@ -53,17 +55,12 @@ class GridView: UIView {
         super.draw(rect)
         //setNeedsDisplay()
         // Drawing code
-        print(self.frame.maxX)
-        print(self.frame.minX)
-        print(self.frame.maxY)
-        print(self.frame.minY)
-        print(rect.maxX)
-        print(rect.minX)
-        print(self.frame.width)
         drawGrid()
         drawBalls()
-        if isGameOver() {
-            parentViewController!.present(GameOverViewController(), animated: true, completion: nil)
+        if isGameOver() && (once == false) {
+            sleep(1)
+            presentGameOver()
+            once = true
         }
         //drawBall(x: X_OFF, y: Y_OFF, score: 0, color_code: 4, alpha: 0xff000000, rect: rect)
         //showBallTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(run), userInfo: nil, repeats: true)
@@ -97,6 +94,24 @@ class GridView: UIView {
          }*/
 
 
+    }
+
+    func getCurrentViewController() -> UIViewController? {
+        if let rootController = UIApplication.shared.keyWindow?.rootViewController {
+            var currentController: UIViewController! = rootController
+            while( currentController.presentedViewController != nil ) {
+                currentController = currentController.presentedViewController
+            }
+            return currentController
+        }
+        return nil
+    }
+
+    func presentGameOver() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "GameOverViewController") as! GameOverViewController
+        let currentController = getCurrentViewController()
+        currentController?.present(vc, animated: true, completion: nil)
     }
 
     func isGameOver() -> Bool {
@@ -369,8 +384,8 @@ class GridView: UIView {
         path.stroke()
     }
 
-    let PADDING = 5
-    func drawBall(x: Int, y: Int, score: Int, color_code: Int, alpha: UInt32) {
+    let PADDING: Double = 5
+    func drawBall(x: Double, y: Double, score: Int, color_code: Int, alpha: UInt32) {
         if color_code == 0 { return }
 
         var color: [UInt32] = [alpha, alpha, alpha]
@@ -391,8 +406,8 @@ class GridView: UIView {
 
         let xx = x + PADDING
         let yy = y + PADDING
-        let xx_stride = Int(x_stride) - 2 * PADDING
-        let yy_stride = Int(y_stride) - 2 * PADDING
+        let xx_stride = x_stride - 2 * PADDING
+        let yy_stride = y_stride - 2 * PADDING
 
         let textAttributes = [
             NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
@@ -408,7 +423,7 @@ class GridView: UIView {
             arc.stroke()
             arc.fill()
 
-            let text_width = Int(String(score).size(withAttributes: textAttributes).width)
+            let text_width = Double(String(score).size(withAttributes: textAttributes).width)
             String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
         } else if (colors == 2) {
             let arc1 = UIBezierPath()
@@ -484,7 +499,14 @@ class GridView: UIView {
                     }
                 }
             }
-            drawBall(x: Int(X_OFF) + (ii % COLUMNS) * Int(x_stride), y: Int(Y_OFF) + ((ii / COLUMNS) % ROWS) * Int(y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)
+
+            /*print(X_OFF + (Double(ii) % Double(COLUMNS)) * x_stride)
+            print(Y_OFF + ((Double(ii) / Double(COLUMNS)) % Double(ROWS)) * y_stride)
+            print(X_OFF + (Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))))
+            print(Y_OFF + ((Double(ii) / Double(COLUMNS)).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride))*/
+            /*drawBall(x: X_OFF + (Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))) * x_stride, y: Y_OFF + ((Double(ii) / Double(COLUMNS)).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)*/
+            let iiDivideColumns = (Double(ii) / Double(COLUMNS)).rounded(.towardZero)
+            drawBall(x: X_OFF + Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride, y: Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)
         }
     }
 
