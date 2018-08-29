@@ -6,8 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -21,53 +19,19 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zKD-XI-x7u" customClass="GridView" customModule="Baller" customModuleProvider="target">
-                                <rect key="frame" x="16" y="304" width="343" height="343"/>
+                                <rect key="frame" x="16" y="20" width="343" height="627"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="zKD-XI-x7u" secondAttribute="height" multiplier="1:1" id="Ig1-Pm-yrI"/>
-                                </constraints>
-                            </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nSl-1G-DPI">
-                                <rect key="frame" x="101" y="30" width="172" height="35"/>
-                                <attributedString key="attributedText">
-                                    <fragment content="RGB Colorfun">
-                                        <attributes>
-                                            <color key="NSColor" red="1" green="0.046545039428554702" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <font key="NSFont" size="32" name="MarkerFelt-Thin"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
-                                        </attributes>
-                                    </fragment>
-                                </attributedString>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r6K-zP-EI1" customClass="ScoreView" customModule="Baller" customModuleProvider="target">
-                                <rect key="frame" x="87" y="96" width="200" height="200"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="r6K-zP-EI1" secondAttribute="height" multiplier="1:1" id="DAs-Te-5Zd"/>
-                                </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="zKD-XI-x7u" secondAttribute="trailing" constant="16" id="2gh-ah-lsF"/>
-                            <constraint firstItem="zKD-XI-x7u" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="1:2" constant="9.5" id="9Gx-lF-1cy"/>
-                            <constraint firstItem="zKD-XI-x7u" firstAttribute="top" secondItem="r6K-zP-EI1" secondAttribute="bottom" constant="8" symbolic="YES" id="9pa-iM-Aco"/>
-                            <constraint firstItem="r6K-zP-EI1" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="AHh-0K-6Rb"/>
-                            <constraint firstItem="r6K-zP-EI1" firstAttribute="top" secondItem="nSl-1G-DPI" secondAttribute="bottom" constant="31" id="IfR-SN-i59"/>
-                            <constraint firstItem="r6K-zP-EI1" firstAttribute="top" secondItem="nSl-1G-DPI" secondAttribute="bottom" constant="31" id="U4S-gR-jlO"/>
-                            <constraint firstItem="zKD-XI-x7u" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="di4-YE-isb"/>
+                            <constraint firstItem="zKD-XI-x7u" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="cEh-Xg-ati"/>
                             <constraint firstItem="zKD-XI-x7u" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="kTW-Qi-dKZ"/>
                             <constraint firstAttribute="bottom" secondItem="zKD-XI-x7u" secondAttribute="bottom" constant="20" symbolic="YES" id="mFt-Vm-vdj"/>
-                            <constraint firstItem="r6K-zP-EI1" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="87" id="o4q-MW-llz"/>
-                            <constraint firstItem="nSl-1G-DPI" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="vco-xm-oAi"/>
-                            <constraint firstItem="nSl-1G-DPI" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="zLq-Mh-BO6"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
-                    <connections>
-                        <outlet property="titleLabel" destination="nSl-1G-DPI" id="r9J-bU-5S8"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
