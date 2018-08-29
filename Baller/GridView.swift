@@ -15,7 +15,7 @@ class GridView: UIView {
     let X_OFF: Double = 10
     let Y_OFF: Double = 10
     let COLUMNS = 4
-    let ROWS = 4
+    let ROWS = 5
     let MAX_NEW_BALLS = 2
     let START_NUM = 4
     let FONT_H: Double = 60
@@ -53,8 +53,8 @@ class GridView: UIView {
     //var aalpha = 0x00000000
     override func draw(_ rect: CGRect) {
         super.draw(rect)
-        //setNeedsDisplay()
         // Drawing code
+        setSizeVars()
         drawGrid()
         drawBalls()
         if isGameOver() && (once == false) {
@@ -359,23 +359,23 @@ class GridView: UIView {
     }
 
     func drawGrid() {
-        x_stride = Double((mW - 2 * X_OFF) / Double(COLUMNS))
-        y_stride = Double((mH - 2 * Y_OFF) / Double(ROWS))
+        x_stride = Double((mW/* - 2 * X_OFF*/) / Double(COLUMNS))
+        y_stride = x_stride//Double((mH/* - 2 * Y_OFF*/) / Double(ROWS))
 
-        var x: Double = X_OFF
-        var y: Double = Y_OFF
+        var x: Double = 0//X_OFF
+        var y: Double = mH//Y_OFF
 
         let path = UIBezierPath()
 
         for _ in 0...ROWS {
-            path.move(to: CGPoint(x: X_OFF, y: y))
-            path.addLine(to: CGPoint(x: mW - X_OFF, y: y))
-            y += y_stride
+            path.move(to: CGPoint(x: 0/*Y_OFF*/, y: y))
+            path.addLine(to: CGPoint(x: mW/* - X_OFF*/, y: y))
+            y -= y_stride
         }
 
         for _ in 0...COLUMNS {
-            path.move(to: CGPoint(x: x, y: Y_OFF))
-            path.addLine(to: CGPoint(x: x, y: mH - Y_OFF))
+            path.move(to: CGPoint(x: x, y: mH/*Y_OFF*/))
+            path.addLine(to: CGPoint(x: x, y: mH -  5 * y_stride/* - Y_OFF*/))
             x += x_stride
         }
 
@@ -506,7 +506,7 @@ class GridView: UIView {
             print(Y_OFF + ((Double(ii) / Double(COLUMNS)).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride))*/
             /*drawBall(x: X_OFF + (Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))) * x_stride, y: Y_OFF + ((Double(ii) / Double(COLUMNS)).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)*/
             let iiDivideColumns = (Double(ii) / Double(COLUMNS)).rounded(.towardZero)
-            drawBall(x: X_OFF + Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride, y: Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)
+            drawBall(x: /*X_OFF + */Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride, y: /*Y_OFF + */mH - 5 * y_stride +  (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride), score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)
         }
     }
 

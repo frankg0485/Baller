@@ -13,11 +13,11 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setTitleColors()
+        //setTitleColors()
         // Do any additional setup after loading the view, typically from a nib.
     }
 
-    func setTitleColors() {
+   /* func setTitleColors() {
         let titleString: NSMutableAttributedString = titleLabel.attributedText! as! NSMutableAttributedString
         var counter = 0
         for color in [UIColor.red, UIColor.green, UIColor.blue] {
@@ -30,7 +30,7 @@ class ViewController: UIViewController {
         titleString.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.blue, range: NSRange(10...11))
 
         titleLabel.attributedText = titleString
-    }
+    }*/
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
