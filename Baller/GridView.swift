@@ -37,7 +37,7 @@ class GridView: UIView {
     var newBallIndex: [Int] = []
 
     var score = 0
-
+    var highScore = SavedData.getHighScore()
     var once = false
 
     private struct Ball: Equatable {
@@ -56,11 +56,13 @@ class GridView: UIView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         // Drawing code
+        print(SavedData.getHighScore())
         drawScore(rect)
         setSizeVars()
         drawGrid()
         drawBalls()
         if isGameOver() && (once == false) {
+            if SavedData.getHighScore() < highScore { SavedData.setHighScore(score: highScore) }
             sleep(1)
             presentGameOver()
             once = true
@@ -100,18 +102,30 @@ class GridView: UIView {
     }
 
     func drawScore(_ rect: CGRect) {
-        let textAttributes = [
+        /*let textAttributes = [
             NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
             NSAttributedStringKey.foregroundColor : UIColor.red
-        ]
-        let scoreStr = "Score: \(score)"
-        let halfLen = scoreStr.size(withAttributes: textAttributes).width / 2
+        ]*/
+        let scoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "SCORE: \(score)")
+        scoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: NSRange(0...1))
+        scoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.green, range: NSRange(2...3))
+        scoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.blue, range: NSRange(4...5))
+        scoreStr.addAttribute(NSAttributedStringKey.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, scoreStr.length))
+        var halfLen = scoreStr.size().width / 2
+        scoreStr.draw(at: CGPoint(x: rect.midX - halfLen, y: 50))
 
-        scoreStr.draw(at: CGPoint(x: rect.midX - halfLen, y: 0), withAttributes: textAttributes)
+        let highScoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "HIGH SCORE: \(highScore)")
+        highScoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: NSRange(0...2))
+        highScoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.green, range: NSRange(3...6))
+        highScoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.blue, range: NSRange(7...10))
+        highScoreStr.addAttribute(NSAttributedStringKey.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, highScoreStr.length))
+        halfLen = highScoreStr.size().width / 2
+        highScoreStr.draw(at: CGPoint(x: rect.midX - halfLen, y: 100))
     }
 
     func calcScore(_ ballScore: Int) {
         score += ballScore
+        if score >= highScore { highScore = score }
     }
 
     func getCurrentViewController() -> UIViewController? {
