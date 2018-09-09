@@ -36,6 +36,8 @@ class GridView: UIView {
     private var balls: [Ball] = []
     var newBallIndex: [Int] = []
 
+    var score = 0
+
     var once = false
 
     private struct Ball: Equatable {
@@ -54,6 +56,7 @@ class GridView: UIView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         // Drawing code
+        drawScore(rect)
         setSizeVars()
         drawGrid()
         drawBalls()
@@ -94,6 +97,21 @@ class GridView: UIView {
          }*/
 
 
+    }
+
+    func drawScore(_ rect: CGRect) {
+        let textAttributes = [
+            NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
+            NSAttributedStringKey.foregroundColor : UIColor.red
+        ]
+        let scoreStr = "Score: \(score)"
+        let halfLen = scoreStr.size(withAttributes: textAttributes).width / 2
+
+        scoreStr.draw(at: CGPoint(x: rect.midX - halfLen, y: 0), withAttributes: textAttributes)
+    }
+
+    func calcScore(_ ballScore: Int) {
+        score += ballScore
     }
 
     func getCurrentViewController() -> UIViewController? {
@@ -181,6 +199,7 @@ class GridView: UIView {
                     //if the two balls have the same color, combine them(score) into the leading space
                     } else if (balls[index + current].color == balls[index + last].color) {
                         balls[index + current].score += balls[index + last].score
+                        calcScore(balls[index + current].score)
 
                         balls[index + last].color = 0
                         last += 1
@@ -221,6 +240,7 @@ class GridView: UIView {
                         last -= 1
                     } else if (balls[index + current].color == balls[index + last].color) {
                         balls[index + current].score += balls[index + last].score
+                        calcScore(balls[index + current].score)
 
                         balls[index + last].color = 0
                         last -= 1
@@ -260,6 +280,7 @@ class GridView: UIView {
                         last += 1
                     } else if (balls[index + current * COLUMNS].color == balls[index + last * COLUMNS].color) {
                         balls[index + current * COLUMNS].score += balls[index + last * COLUMNS].score
+                        calcScore(balls[index + current * COLUMNS].score)
 
                         balls[index + last * COLUMNS].color = 0
                         last += 1
@@ -298,6 +319,7 @@ class GridView: UIView {
                         last -= 1
                     } else if (balls[index + current * COLUMNS].color == balls[index + last * COLUMNS].color) {
                         balls[index + current * COLUMNS].score += balls[index + last * COLUMNS].score
+                        calcScore(balls[index + current * COLUMNS].score)
 
                         balls[index + last * COLUMNS].color = 0
                         last -= 1
@@ -327,6 +349,7 @@ class GridView: UIView {
             if ((balls[idx1].color & balls[idx2].color) == balls[idx1].color) {
                 score = balls[idx2].score / numOfColors(balls[idx2].color)
                 balls[idx1].score += score
+                calcScore(balls[idx1].score)
                 balls[idx2].score -= score
                 balls[idx2].color ^= balls[idx1].color
             }
@@ -334,6 +357,7 @@ class GridView: UIView {
             if ((balls[idx2].color & balls[idx1].color) == balls[idx2].color) {
                 score = balls[idx1].score / numOfColors(balls[idx1].color)
                 balls[idx2].score += score
+                calcScore(balls[idx1].score)
                 balls[idx1].score -= score
                 balls[idx1].color ^= balls[idx2].color
             }
