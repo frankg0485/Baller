@@ -20,4 +20,12 @@ class SavedData {
     static func setHighScore(score: Int) {
         defaults.set(score, forKey: highScore)
     }
+
+    /*static func getScore() -> Int {
+        return defaults.integer(forKey: highScore)
+    }
+
+    static func setScore(score: Int) {
+        defaults.set(score, forKey: highScore)
+    }*/
 }

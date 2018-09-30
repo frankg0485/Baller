@@ -10,8 +10,11 @@ import UIKit
 import Foundation
 import CoreGraphics
 
+protocol ModalHandler {
+    func modalDismissed()
+}
 
-class GridView: UIView {
+class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     let X_OFF: Double = 10
     let Y_OFF: Double = 10
     let COLUMNS = 4
@@ -38,7 +41,9 @@ class GridView: UIView {
 
     var score = 0
     var highScore = SavedData.getHighScore()
+
     var once = false
+    var redrawBalls = true
 
     private struct Ball: Equatable {
         var color: Int
@@ -56,16 +61,18 @@ class GridView: UIView {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         // Drawing code
-        print(SavedData.getHighScore())
         drawScore(rect)
         setSizeVars()
         drawGrid()
         drawBalls()
         if isGameOver() && (once == false) {
             if SavedData.getHighScore() < highScore { SavedData.setHighScore(score: highScore) }
-            sleep(1)
-            presentGameOver()
-            once = true
+
+            if !redrawBalls {
+                once = true
+                usleep(250000)
+                presentGameOver()
+            } else { redrawBalls = false }
         }
         //drawBall(x: X_OFF, y: Y_OFF, score: 0, color_code: 4, alpha: 0xff000000, rect: rect)
         //showBallTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(run), userInfo: nil, repeats: true)
@@ -73,6 +80,19 @@ class GridView: UIView {
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        gridInit()
+    }
+
+    func modalDismissed() {
+        gridInit()
+        //setNeedsDisplay()
+    }
+
+    func gridInit() {
+        score = 0
+        once = false
+        redrawBalls = true
+
         setSizeVars()
         setUpGestures()
 
@@ -97,8 +117,6 @@ class GridView: UIView {
         /*for i in 0...balls.count - 1 {
          print(balls[i].color)
          }*/
-
-
     }
 
     func drawScore(_ rect: CGRect) {
@@ -107,20 +125,25 @@ class GridView: UIView {
             NSAttributedStringKey.foregroundColor : UIColor.red
         ]*/
         let scoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "SCORE: \(score)")
-        scoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: NSRange(0...1))
-        scoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.green, range: NSRange(2...3))
-        scoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.blue, range: NSRange(4...5))
-        scoreStr.addAttribute(NSAttributedStringKey.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, scoreStr.length))
-        var halfLen = scoreStr.size().width / 2
-        scoreStr.draw(at: CGPoint(x: rect.midX - halfLen, y: 50))
+        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...1))
+        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(2...3))
+        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(4...5))
+        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, scoreStr.length))
+        var halfLen = scoreStr.attributedSubstring(from: NSRange(location: 0, length: 6)).size().width / 2
+        scoreStr.attributedSubstring(from: NSRange(location: 0, length: 6)).draw(at: CGPoint(x: rect.maxX / 3 - halfLen, y: 50))
+        halfLen = scoreStr.attributedSubstring(from: NSRange(location: 7, length: scoreStr.length - 7)).size().width / 2
+        scoreStr.attributedSubstring(from: NSRange(location: 7, length: scoreStr.length - 7)).draw(at: CGPoint(x: rect.maxX / 3 - halfLen, y: 100))
 
         let highScoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "HIGH SCORE: \(highScore)")
-        highScoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.red, range: NSRange(0...2))
-        highScoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.green, range: NSRange(3...6))
-        highScoreStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.blue, range: NSRange(7...10))
-        highScoreStr.addAttribute(NSAttributedStringKey.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, highScoreStr.length))
-        halfLen = highScoreStr.size().width / 2
-        highScoreStr.draw(at: CGPoint(x: rect.midX - halfLen, y: 100))
+        print(scoreStr, highScoreStr)
+        highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
+        highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(3...6))
+        highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...10))
+        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, highScoreStr.length))
+        halfLen = highScoreStr.attributedSubstring(from: NSRange(location: 0, length: 12)).size().width / 2
+        highScoreStr.attributedSubstring(from: NSRange(location: 0, length: 12)).draw(at: CGPoint(x: rect.maxX * 2 / 3 - halfLen, y: 50))
+        halfLen = highScoreStr.attributedSubstring(from: NSRange(location: 12, length: highScoreStr.length - 12)).size().width / 2
+        highScoreStr.attributedSubstring(from: NSRange(location: 12, length: highScoreStr.length - 12)).draw(at: CGPoint(x: rect.maxX * 2 / 3 - halfLen, y: 100))
     }
 
     func calcScore(_ ballScore: Int) {
@@ -140,10 +163,31 @@ class GridView: UIView {
     }
 
     func presentGameOver() {
+        /*let transition: CATransition = CATransition()
+        transition.duration = 0.75
+        transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        transition.type = CATransitionType.fade*/
+
+        let currentController = (getCurrentViewController() as! UINavigationController).topViewController!
+        //print(currentController.navigationController)
+        //currentController.navigationController!.view.layer.add(transition, forKey: nil)
+
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "GameOverViewController") as! GameOverViewController
-        let currentController = getCurrentViewController()
-        currentController?.present(vc, animated: true, completion: nil)
+        vc.modalPresentationStyle = UIModalPresentationStyle.popover
+        vc.highScore = highScore
+        vc.score = score
+        vc.FONT_H = FONT_H
+        vc.delegate = self
+        if let popoverPresentationController =  vc.popoverPresentationController {
+            popoverPresentationController.delegate = self
+            popoverPresentationController.sourceView  = currentController.view
+            popoverPresentationController.sourceRect  = CGRect.init(x: currentController.view.frame.midX, y: currentController.view.frame.midY, width: 0, height: 0)
+            popoverPresentationController.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
+        }
+        currentController.present(vc, animated: false, completion: {
+            vc.fadeIn()
+        })
     }
 
     func isGameOver() -> Bool {
@@ -448,8 +492,8 @@ class GridView: UIView {
         let yy_stride = y_stride - 2 * PADDING
 
         let textAttributes = [
-            NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
-            NSAttributedStringKey.foregroundColor : UIColor.white
+            NSAttributedString.Key.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
+            NSAttributedString.Key.foregroundColor : UIColor.white
         ]
 
         let center = CGPoint(x: xx + xx_stride / 2, y: yy + yy_stride / 2)
@@ -596,6 +640,14 @@ class GridView: UIView {
             showNewBallInProgress = false
         }
         setNeedsDisplay()
+    }
+
+    func popoverPresentationControllerShouldDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) -> Bool {
+        return false
+    }
+
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return UIModalPresentationStyle.none
     }
 }
 
