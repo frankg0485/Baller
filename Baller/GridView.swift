@@ -52,13 +52,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     var redrawBalls = true
 
     var startingPositions = [CGPoint]()
-    var positionsInUse = [Bool]()
-    var scores = [Int]()
+    private var scoreAnimationData = [ScoreData]()
 
     //This is set in drawScore()
     var mainScorePosition = CGPoint(x: 0, y: 0)
 
-    let tests = [2, 3, 2, 2,
+    let tests = [0, 0, 1, 1,
                  0, 0, 0, 0,
                  0, 0, 0, 0,
                  0, 0, 0, 0,
@@ -76,6 +75,16 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         }
     }
 
+    private struct ScoreData: Equatable {
+        var score: Int
+        var position: CGPoint
+        var posIndex: Int
+        init(score: Int, point: CGPoint, index: Int) {
+            self.score = score
+            self.position = point
+            self.posIndex = index
+        }
+    }
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
     //var aalpha = 0x00000000
@@ -92,7 +101,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
             if !redrawBalls {
                 once = true
-                stopTimers()
+                animateScoreTimer?.invalidate()
+                animateScoreTimer = nil
+                showBallTimer?.invalidate()
+                showBallTimer = nil
 
                 usleep(250000)
                 presentGameOver()
@@ -107,12 +119,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         gridInit()
     }
 
-    func stopTimers() {
+    /*func stopTimers() {
         animateScoreTimer?.invalidate()
         animateScoreTimer = nil
         showBallTimer?.invalidate()
         showBallTimer = nil
-    }
+    }*/
 
     func modalDismissed() {
         gridInit()
@@ -130,9 +142,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
         balls = Array(repeating: Ball(), count: ROWS * COLUMNS)
         newBallIndex = Array(repeating: 0, count: MAX_NEW_BALLS)
-        startingPositions = Array(repeatElement(CGPoint(x: 0, y: 0), count: ROWS * COLUMNS))
-        positionsInUse = Array(repeatElement(false, count: ROWS * COLUMNS))
-        scores = Array(repeatElement(0, count: ROWS * COLUMNS))
+        scoreAnimationData = [ScoreData]()
+        startingPositions = Array(repeating: CGPoint(x: 0, y: 0), count: ROWS * COLUMNS)
+
+        beginAnimation()
 
         var rdmNumbers: Set<Int> = []
         while rdmNumbers.count < START_NUM {
@@ -178,36 +191,47 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         highScoreStr.attributedSubstring(from: NSRange(location: 12, length: highScoreStr.length - 12)).draw(at: CGPoint(x: rect.maxX * 2 / 3 - halfLen, y: 100))
     }
 
-    func resetScoreAnimationData() {
+    /*func resetScoreAnimationData() {
         scoreTime = 0
         positionsInUse = Array(repeating: false, count: ROWS * COLUMNS)
         scores = Array(repeating: 0, count: ROWS * COLUMNS)
         animationInProgress = false
+     }*/
+
+    private func removeScoreElement(_ scoreElement: ScoreData) {
+        scoreAnimationData.remove(at: scoreAnimationData.firstIndex(of: scoreElement)!)
     }
 
     func drawScoreAnimation() {
         var count = 0
-        for position in startingPositions {
-            if positionsInUse[count] {
-                let scoreStr = "+\(scores[count])"
-                let finalStr: NSMutableAttributedString = NSMutableAttributedString(string: scoreStr)
-                finalStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.black, range: NSRange(0..<scoreStr.count))
-                finalStr.draw(at: CGPoint(x: (scoreTime / travelTime) * Double(mainScorePosition.x - position.x) + Double(position.x), y: (scoreTime / travelTime) * Double(mainScorePosition.y - position.y) + Double(position.y)))
+        for _ in scoreAnimationData {
+            if (round(scoreAnimationData[count].position.x) == round(mainScorePosition.x)) || (round(scoreAnimationData[count].position.y) == round(mainScorePosition.y)) {
+                displayScore += scoreAnimationData[count].score// = realScore
+                removeScoreElement(scoreAnimationData[count])
+                if displayScore > highScore { highScore = displayScore }
+                setNeedsDisplay()
+                continue
             }
+            let scoreStr = "+\(scoreAnimationData[count].score)"
+            let finalStr: NSMutableAttributedString = NSMutableAttributedString(string: scoreStr)
+            finalStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.black, range: NSRange(0..<scoreStr.count))
+            scoreAnimationData[count].position.x += CGFloat(increment) * (mainScorePosition.x - startingPositions[scoreAnimationData[count].posIndex].x) / CGFloat(travelTime)
+            scoreAnimationData[count].position.y += CGFloat(increment) * (mainScorePosition.y - startingPositions[scoreAnimationData[count].posIndex].y) / CGFloat(travelTime)
+            finalStr.draw(at: CGPoint(x: scoreAnimationData[count].position.x/*CGPoint(x: (scoreTime / travelTime) * Double(mainScorePosition.x - data.position.x) + Double(data.position.x)*/, y: scoreAnimationData[count].position.y/*(scoreTime / travelTime) * Double(mainScorePosition.y - data.position.y) + Double(position.y))*/))
             count += 1
         }
     }
 
     @objc func animateScore() {
-        scoreTime += increment
-        if scoreTime > travelTime {
+        //scoreTime += increment
+        /*if scoreTime > travelTime {
             animateScoreTimer?.invalidate()
             animateScoreTimer = nil
 
             displayScore = realScore
             if displayScore > highScore { highScore = displayScore }
-            resetScoreAnimationData()
-        }
+            //resetScoreAnimationData()
+        }*/
         setNeedsDisplay()
     }
 
@@ -295,10 +319,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         self.addGestureRecognizer(bottomSwipe)
     }
 
-    func updatePositionScoreArrays(_ index: Int) {
+    /*func updatePositionScoreArrays(_ index: Int) {
         positionsInUse[index] = true
         scores[index] = balls[index].score
-    }
+    }*/
 
     func beginAnimation() {
         animateScoreTimer = Timer.scheduledTimer(timeInterval: increment, target: self, selector: #selector(animateScore), userInfo: nil, repeats: true)
@@ -310,7 +334,9 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     }
 
     @objc func onSwipeLeft() {
-        stopTimers()
+        showBallTimer?.invalidate()
+        showBallTimer = nil
+
         var index = 0
         for _ in 0...ROWS - 1 {
             var current = 0
@@ -341,7 +367,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                             calcScore(balls[index + last].score)
                         }
 
-                        updatePositionScoreArrays(index + current)
+                        scoreAnimationData.append(ScoreData(score: balls[index + current].score, point: startingPositions[index + current], index: index + current))
+                        //updatePositionScoreArrays(index + current)
                         last += 1
                     //otherwise, merge the multicolor ball, and if the two balls have diff colors, they won't merge
                     } else {
@@ -358,13 +385,14 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             index += COLUMNS
         }
 
-        beginAnimation()
         addRandomBall()
         setNeedsDisplay()
     }
 
     @objc func onSwipeRight() {
-        stopTimers()
+        showBallTimer?.invalidate()
+        showBallTimer = nil
+
         var index = 0
         for _ in 0...ROWS - 1 {
             var current = COLUMNS - 1
@@ -393,7 +421,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                             calcScore(balls[index + last].score)
                         }
 
-                        updatePositionScoreArrays(index + current)
+                        scoreAnimationData.append(ScoreData(score: balls[index + current].score, point: startingPositions[index + current], index: index + current))
+                        //updatePositionScoreArrays(index + current)
                         last -= 1
                     } else {
                         mergeMultiColor(idx1: index + current, idx2: index + last)
@@ -409,13 +438,14 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             index += COLUMNS
         }
 
-        beginAnimation()
         addRandomBall()
         setNeedsDisplay()
     }
 
     @objc func onSwipeTop() {
-        stopTimers()
+        showBallTimer?.invalidate()
+        showBallTimer = nil
+
         var index = 0
         for _ in 0...COLUMNS - 1 {
             var current = 0
@@ -444,7 +474,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                             calcScore(balls[index + last * COLUMNS].score)
                         }
 
-                        updatePositionScoreArrays(index + current * COLUMNS)
+                        scoreAnimationData.append(ScoreData(score: balls[index + current * COLUMNS].score, point: startingPositions[index + current * COLUMNS], index: index + current * COLUMNS))
+                        //updatePositionScoreArrays(index + current * COLUMNS)
                         last += 1
                     } else {
                         mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS)
@@ -460,13 +491,14 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             index += 1
         }
 
-        beginAnimation()
         addRandomBall()
         setNeedsDisplay()
     }
 
     @objc func onSwipeBottom() {
-        stopTimers()
+        showBallTimer?.invalidate()
+        showBallTimer = nil
+
         var index = 0
         for _ in 0...COLUMNS - 1 {
             var current = ROWS - 1
@@ -494,7 +526,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                             calcScore(balls[index + last * COLUMNS].score)
                         }
 
-                        updatePositionScoreArrays(index + current * COLUMNS)
+                        scoreAnimationData.append(ScoreData(score: balls[index + current * COLUMNS].score, point: startingPositions[index + current * COLUMNS], index: index + current * COLUMNS))
+                        //updatePositionScoreArrays(index + current * COLUMNS)
                         last -= 1
                     } else {
                         mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS)
@@ -509,7 +542,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             index += 1
         }
 
-        beginAnimation()
         addRandomBall()
         setNeedsDisplay()
     }
@@ -532,7 +564,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                 balls[idx2].score -= score
                 balls[idx2].color ^= balls[idx1].color
 
-                updatePositionScoreArrays(idx1)
+                scoreAnimationData.append(ScoreData(score: balls[idx1].score, point: startingPositions[idx1], index: idx1))
+                //updatePositionScoreArrays(idx1)
             }
         } else if isSingleColor(balls[idx2].color) {
             if ((balls[idx2].color & balls[idx1].color) == balls[idx2].color) {
@@ -542,7 +575,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                 balls[idx1].score -= score
                 balls[idx1].color ^= balls[idx2].color
 
-                updatePositionScoreArrays(idx2)
+                scoreAnimationData.append(ScoreData(score: balls[idx2].score, point: startingPositions[idx2], index: idx2))
+                //updatePositionScoreArrays(idx2)
             }
         }
     }
