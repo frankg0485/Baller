@@ -188,7 +188,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     func drawScoreAnimation() {
         var count = 0
         for position in startingPositions {
-            if positionsInUse[count] == true {
+            if positionsInUse[count] {
                 let scoreStr = "+\(scores[count])"
                 let finalStr: NSMutableAttributedString = NSMutableAttributedString(string: scoreStr)
                 finalStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.black, range: NSRange(0..<scoreStr.count))
@@ -332,6 +332,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                     //if the two balls have the same color, combine them(score) into the leading space
                     } else if (balls[index + current].color == balls[index + last].color) {
                         balls[index + current].score += balls[index + last].score
+                        balls[index + last].color = 0
 
                         if !continueCombining {
                             calcScore(balls[index + current].score)
@@ -341,8 +342,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         }
 
                         updatePositionScoreArrays(index + current)
-
-                        balls[index + last].color = 0
                         last += 1
                     //otherwise, merge the multicolor ball, and if the two balls have diff colors, they won't merge
                     } else {
@@ -385,6 +384,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         last -= 1
                     } else if (balls[index + current].color == balls[index + last].color) {
                         balls[index + current].score += balls[index + last].score
+                        balls[index + last].color = 0
 
                         if !continueCombining {
                             calcScore(balls[index + current].score)
@@ -394,8 +394,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         }
 
                         updatePositionScoreArrays(index + current)
-
-                        balls[index + last].color = 0
                         last -= 1
                     } else {
                         mergeMultiColor(idx1: index + current, idx2: index + last)
@@ -437,6 +435,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         last += 1
                     } else if (balls[index + current * COLUMNS].color == balls[index + last * COLUMNS].color) {
                         balls[index + current * COLUMNS].score += balls[index + last * COLUMNS].score
+                        balls[index + last * COLUMNS].color = 0
 
                         if !continueCombining {
                             calcScore(balls[index + current * COLUMNS].score)
@@ -446,8 +445,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         }
 
                         updatePositionScoreArrays(index + current * COLUMNS)
-
-                        balls[index + last * COLUMNS].color = 0
                         last += 1
                     } else {
                         mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS)
@@ -488,7 +485,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         last -= 1
                     } else if (balls[index + current * COLUMNS].color == balls[index + last * COLUMNS].color) {
                         balls[index + current * COLUMNS].score += balls[index + last * COLUMNS].score
-
+                        balls[index + last * COLUMNS].color = 0
 
                         if !continueCombining {
                             calcScore(balls[index + current * COLUMNS].score)
@@ -498,8 +495,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         }
 
                         updatePositionScoreArrays(index + current * COLUMNS)
-
-                        balls[index + last * COLUMNS].color = 0
                         last -= 1
                     } else {
                         mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS)
