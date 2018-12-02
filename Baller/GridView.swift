@@ -57,11 +57,11 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     //This is set in drawScore()
     var mainScorePosition = CGPoint(x: 0, y: 0)
 
-    let tests = [1, 0, 0, 0,
-                 1, 0, 0, 0,
-                 1, 0, 0, 0,
-                 0, 0, 0, 0,
-                 0, 0, 0, 0]
+    let tests = [0, 0, 1, 0,
+                 0, 0, 1, 0,
+                 0, 0, 1, 0,
+                 0, 0, 1, 0,
+                 0, 0, 1, 0]
 
     var continueCombining = false
 
@@ -154,15 +154,15 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             rdmNumbers.insert(Int(arc4random_uniform(UInt32(UInt32(balls.count)))))
         }
 
-        /*let startColors = [1, 2, 4]
+        let startColors = [1, 2, 4]
         for rdm in rdmNumbers {
             balls[rdm].color = startColors[Int(arc4random_uniform(3))]
             balls[rdm].score = 1
-        }*/
-        for i in 0...ROWS*COLUMNS - 1 {
+        }
+        /*for i in 0...ROWS*COLUMNS - 1 {
             balls[i].color = tests[i]
             balls[i].score = numOfColors(balls[i].color)
-        }
+        }*/
     }
 
     func drawScore(_ rect: CGRect) {
@@ -342,11 +342,65 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         realScore += ballScore
     }
 
+    func appendToAnimationArray(idx: Int, score: Int) {
+        scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((increment / travelTime) * (Double(startingPositions[idx].x) - Double(mainScorePosition.x)), (increment / travelTime) * (Double(startingPositions[idx].y) - Double(mainScorePosition.y)))))
+    }
+
     @objc func onSwipeLeft() {
         showBallTimer?.invalidate()
         showBallTimer = nil
 
-        var index = 0
+        var index = (ROWS - 1) * COLUMNS
+        var rightIndex = ROWS * COLUMNS - 1
+        var counter = 0
+
+        func shiftBalls() {
+            while (rightIndex + counter) < (index + COLUMNS - 1) {
+                balls[rightIndex + counter].color = balls[rightIndex + counter + 1].color
+                balls[rightIndex + counter].score = balls[rightIndex + counter + 1].score
+                balls[rightIndex + counter + 1].color = 0
+                balls[rightIndex + counter + 1].score = 0
+                counter += 1
+            }
+        }
+
+        for _ in 0...ROWS - 1 {
+            while rightIndex > index {
+                //find the rightmost ball in the row that has non-white color
+                while (balls[rightIndex].color == 0) && (rightIndex > index) { rightIndex -= 1 }
+                //if there is only one ball on the very left, or there are none in the row, move on to the next row
+                if rightIndex == index { break }
+                if balls[rightIndex - 1].color == 0 {
+                    //if the ball on the left is empty, move all balls left one space
+                    //start by shifting current ball onto the left one
+                    counter = -1
+                    shiftBalls()
+                } else if balls[rightIndex - 1].color == balls[rightIndex].color {
+                    //if the ball on the left has the same color as this one, combine the two and put it on the left square
+                    //Only add the smaller ball score to the total
+                    if balls[rightIndex].score < balls[rightIndex - 1].score {
+                        calcScore(rightIndex)
+                        appendToAnimationArray(idx: rightIndex, score: balls[rightIndex].score)
+                    } else {
+                        calcScore(rightIndex - 1)
+                        appendToAnimationArray(idx: rightIndex - 1, score: balls[rightIndex - 1].score)
+                    }
+                    balls[rightIndex - 1].score += balls[rightIndex].score
+                    balls[rightIndex].score = 0
+                    balls[rightIndex].color = 0
+                    //start by shifting the one on the right to the current one
+                    counter = 0
+                    shiftBalls()
+                } else {
+                    mergeMultiColor(idx1: rightIndex, idx2: rightIndex - 1, defaultIdx: rightIndex - 1)
+                }
+                rightIndex -= 1
+            }
+
+            rightIndex -= 1
+            index -= COLUMNS
+        }
+        /*var index = 0
         for _ in 0...ROWS - 1 {
             var current = 0
             var last = current + 1 //first ball in the row to have non-white color
@@ -395,7 +449,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             continueCombining = false
             index += COLUMNS
         }
-
+        */
         addRandomBall()
         setNeedsDisplay()
     }
@@ -404,7 +458,57 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         showBallTimer?.invalidate()
         showBallTimer = nil
 
-        var index = 0
+        var index = COLUMNS - 1
+        var leftIndex = 0
+        var counter = 0
+
+        func shiftBalls() {
+            while (leftIndex - counter) > (index - (COLUMNS - 1)) {
+                balls[leftIndex - counter].color = balls[leftIndex - counter - 1].color
+                balls[leftIndex - counter].score = balls[leftIndex - counter - 1].score
+                balls[leftIndex - counter - 1].color = 0
+                balls[leftIndex - counter - 1].score = 0
+                counter += 1
+            }
+        }
+
+        for _ in 0...ROWS - 1 {
+            while leftIndex < index {
+                //find the leftmost ball in the row that has non-white color
+                while (balls[leftIndex].color == 0) && (leftIndex < index) { leftIndex += 1 }
+                //if there is only one ball on the very right, or there are none in the row, move on to the next row
+                if leftIndex == index { break }
+                if balls[leftIndex + 1].color == 0 {
+                    //if the ball on the right is empty, move all balls right one space
+                    //start by moving the current ball onto the one on the right
+                    counter = -1
+                    shiftBalls()
+                } else if balls[leftIndex + 1].color == balls[leftIndex].color {
+                    //if the ball on the right has the same color as this one, combine the two and put it on the right square
+                    //Only add the smaller ball score to the total
+                    if balls[leftIndex].score < balls[leftIndex + 1].score {
+                        calcScore(leftIndex)
+                        appendToAnimationArray(idx: leftIndex, score: balls[leftIndex].score)
+                    } else {
+                        calcScore(leftIndex + 1)
+                        appendToAnimationArray(idx: leftIndex + 1, score: balls[leftIndex + 1].score)
+                    }
+                    balls[leftIndex + 1].score += balls[leftIndex].score
+                    balls[leftIndex].score = 0
+                    balls[leftIndex].color = 0
+                    //start shifting by moving the left ball onto this one
+                    counter = 0
+                    shiftBalls()
+                } else {
+                    mergeMultiColor(idx1: leftIndex, idx2: leftIndex + 1, defaultIdx: leftIndex + 1)
+                }
+                leftIndex += 1
+            }
+
+            leftIndex += 1
+            index += COLUMNS
+        }
+        /*var index = 0
         for _ in 0...ROWS - 1 {
             var current = COLUMNS - 1
             var last = current - 1
@@ -438,7 +542,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         //updatePositionScoreArrays(index + current)
                         last -= 1
                     } else {
-                        mergeMultiColor(idx1: index + current, idx2: index + last)
+                        mergeMultiColor(idx1: index + current, idx2: index + last, defaultIdx: index + current)
 
                         current -= 1
                         last = current - 1
@@ -449,7 +553,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
             continueCombining = false
             index += COLUMNS
-        }
+        }*/
 
         addRandomBall()
         setNeedsDisplay()
@@ -460,6 +564,56 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         showBallTimer = nil
 
         var index = 0
+        var bottomIndex = COLUMNS * (ROWS - 1)
+        var counter = 0
+
+        func shiftBalls() {
+            while (bottomIndex + counter * COLUMNS) < (index + COLUMNS * (ROWS - 1)) {
+                balls[bottomIndex + counter * COLUMNS].color = balls[bottomIndex + counter * COLUMNS + COLUMNS].color
+                balls[bottomIndex + counter * COLUMNS].score = balls[bottomIndex + counter * COLUMNS + COLUMNS].score
+                balls[bottomIndex + counter * COLUMNS + COLUMNS].color = 0
+                balls[bottomIndex + counter * COLUMNS + COLUMNS].score = 0
+                counter += 1
+            }
+        }
+
+        for _ in 0...COLUMNS - 1 {
+            while bottomIndex > index {
+                //find the lowest ball in the row that has non-white color
+                while (balls[bottomIndex].color == 0) && (bottomIndex > index) { bottomIndex -= COLUMNS }
+                //if there is only one ball on the very top, or there are none in the column, move on to the next column
+                if bottomIndex == index { break }
+                if balls[bottomIndex - COLUMNS].color == 0 {
+                    //if the ball on the top is empty, move all balls up one space
+                    //start by shifting current ball onto the top one
+                    counter = -1
+                    shiftBalls()
+                } else if balls[bottomIndex - COLUMNS].color == balls[bottomIndex].color {
+                    //if the ball on the left has the same color as this one, combine the two and put it on the left square
+                    //Only add the smaller ball score to the total
+                    if balls[bottomIndex].score < balls[bottomIndex - COLUMNS].score {
+                        calcScore(bottomIndex)
+                        appendToAnimationArray(idx: bottomIndex, score: balls[bottomIndex].score)
+                    } else {
+                        calcScore(bottomIndex - COLUMNS)
+                        appendToAnimationArray(idx: bottomIndex - COLUMNS, score: balls[bottomIndex - COLUMNS].score)
+                    }
+                    balls[bottomIndex - COLUMNS].score += balls[bottomIndex].score
+                    balls[bottomIndex].score = 0
+                    balls[bottomIndex].color = 0
+                    //start by shifting the one on the bottom to the current one
+                    counter = 0
+                    shiftBalls()
+                } else {
+                    mergeMultiColor(idx1: bottomIndex, idx2: bottomIndex - COLUMNS, defaultIdx: bottomIndex - COLUMNS)
+                }
+                bottomIndex -= COLUMNS
+            }
+
+            index += 1
+            bottomIndex = index + COLUMNS * (ROWS - 1)
+        }
+        /*var index = 0
         for _ in 0...COLUMNS - 1 {
             var current = 0
             var last = current + 1
@@ -493,7 +647,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         //updatePositionScoreArrays(index + current * COLUMNS)
                         last += 1
                     } else {
-                        mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS)
+                        mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS, defaultIdx: index + current * COLUMNS)
 
                         current += 1
                         last = current + 1
@@ -504,7 +658,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
             continueCombining = false
             index += 1
-        }
+        }*/
 
         addRandomBall()
         setNeedsDisplay()
@@ -514,7 +668,57 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         showBallTimer?.invalidate()
         showBallTimer = nil
 
-        var index = 0
+        var index = COLUMNS * (ROWS - 1)
+        var topIndex = 0
+        var counter = 0
+
+        func shiftBalls() {
+            while (topIndex - counter * COLUMNS) > (index - COLUMNS * (ROWS - 1)) {
+                balls[topIndex - counter * COLUMNS].color = balls[topIndex - counter * COLUMNS - COLUMNS].color
+                balls[topIndex - counter * COLUMNS].score = balls[topIndex - counter * COLUMNS - COLUMNS].score
+                balls[topIndex - counter * COLUMNS - COLUMNS].color = 0
+                balls[topIndex - counter * COLUMNS - COLUMNS].score = 0
+                counter += 1
+            }
+        }
+
+        for _ in 0...COLUMNS - 1 {
+            while topIndex < index {
+                //find the leftmost ball in the row that has non-white color
+                while (balls[topIndex].color == 0) && (topIndex < index) { topIndex += COLUMNS }
+                //if there is only one ball on the very right, or there are none in the row, move on to the next row
+                if topIndex == index { break }
+                if balls[topIndex + COLUMNS].color == 0 {
+                    //if the ball on the right is empty, move all balls right one space
+                    //start by moving the current ball onto the one on the right
+                    counter = -1
+                    shiftBalls()
+                } else if balls[topIndex + COLUMNS].color == balls[topIndex].color {
+                    //if the ball on the right has the same color as this one, combine the two and put it on the right square
+                    //Only add the smaller ball score to the total
+                    if balls[topIndex].score < balls[topIndex + COLUMNS].score {
+                        calcScore(topIndex)
+                        appendToAnimationArray(idx: topIndex, score: balls[topIndex].score)
+                    } else {
+                        calcScore(topIndex + COLUMNS)
+                        appendToAnimationArray(idx: topIndex + COLUMNS, score: balls[topIndex + COLUMNS].score)
+                    }
+                    balls[topIndex + COLUMNS].score += balls[topIndex].score
+                    balls[topIndex].score = 0
+                    balls[topIndex].color = 0
+                    //start shifting by moving the left ball onto this one
+                    counter = 0
+                    shiftBalls()
+                } else {
+                    mergeMultiColor(idx1: topIndex, idx2: topIndex + COLUMNS, defaultIdx: topIndex + COLUMNS)
+                }
+                topIndex += COLUMNS
+            }
+
+            index += 1
+            topIndex = index - COLUMNS * (ROWS - 1)
+        }
+        /*var index = 0
         for _ in 0...COLUMNS - 1 {
             var current = ROWS - 1
             var last = current - 1
@@ -547,7 +751,19 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                         //updatePositionScoreArrays(index + current * COLUMNS)
                         last -= 1
                     } else {
-                        mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS)
+                        /*var idx = index + last
+                        var savedIndex = idx
+                        while idx < (index + current * (COLUMNS - 1)) {
+                            if balls[idx + COLUMNS].color == 0 {
+                                balls[idx + COLUMNS].color = balls[idx].color
+                                balls[idx + COLUMNS].score = balls[idx].score
+                                balls[idx].color = 0
+                                balls[idx].score = 0
+                            }
+                            savedIndex = idx + COLUMNS
+                            idx += COLUMNS
+                        }*/
+                        mergeMultiColor(idx1: index + current * COLUMNS, idx2: index + last * COLUMNS, defaultIdx: index + current * COLUMNS)
 
                         current -= 1
                         last = current - 1
@@ -557,7 +773,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             }
             continueCombining = false
             index += 1
-        }
+        }*/
 
         addRandomBall()
         setNeedsDisplay()
@@ -567,33 +783,73 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         return numOfColors(color_code) == 1
     }
 
-    func mergeMultiColor(idx1: Int, idx2: Int) {
+    func mergeMultiColor(idx1: Int, idx2: Int, defaultIdx: Int) {
         var score = 0
         if isSingleColor(balls[idx1].color) {
             if ((balls[idx1].color & balls[idx2].color) == balls[idx1].color) {
                 score = balls[idx2].score / numOfColors(balls[idx2].color)
+                if score >= balls[idx1].score {
+                    if defaultIdx == idx1 {
+                        calcScore(balls[idx1].score)
+                        appendToAnimationArray(idx: idx1, score: balls[idx1].score)
+                    } else {
+                        calcScore(score)
+                        appendToAnimationArray(idx: idx2, score: score)
+                    }
+                } else {
+                    calcScore(score)
+                    appendToAnimationArray(idx: idx2, score: score)
+                }
+                /*if score > balls[idx1].score {
+                    calcScore(balls[idx1].score)
+                    appendToAnimationArray(idx: idx1)
+                } else {
+                    calcScore(score)
+                    appendToAnimationArray(idx: idx2)
+                }*/
                 balls[idx1].score += score
-                if !continueCombining {
+                /*if !continueCombining {
                     calcScore(balls[idx1].score)
                     scoreAnimationData.append(ScoreData(score: balls[idx1].score, point: startingPositions[idx1], delta: ((increment / travelTime) * (Double(startingPositions[idx1].x) - Double(mainScorePosition.x)), (increment / travelTime) * (Double(startingPositions[idx1].y) - Double(mainScorePosition.y)))))
                 } else {
                     calcScore(score)
                     scoreAnimationData[savedIndex].score += score
-                }
+                }*/
                 balls[idx2].score -= score
                 balls[idx2].color ^= balls[idx1].color
+                //scoreAnimationData.append(ScoreData(score: balls[idx1].score, point: startingPositions[idx1], delta: ((increment / travelTime) * (Double(startingPositions[idx1].x) - Double(mainScorePosition.x)), (increment / travelTime) * (Double(startingPositions[idx1].y) - Double(mainScorePosition.y)))))
 
                 //updatePositionScoreArrays(idx1)
             }
         } else if isSingleColor(balls[idx2].color) {
             if ((balls[idx2].color & balls[idx1].color) == balls[idx2].color) {
                 score = balls[idx1].score / numOfColors(balls[idx1].color)
+                //Only add the smaller score to the total
+                if score >= balls[idx2].score {
+                    if defaultIdx == idx2 {
+                        calcScore(balls[idx2].score)
+                        appendToAnimationArray(idx: idx2, score: balls[idx2].score)
+                    } else {
+                        calcScore(score)
+                        appendToAnimationArray(idx: idx1, score: score)
+                    }
+                } else {
+                    calcScore(score)
+                    appendToAnimationArray(idx: idx1, score: score)
+                }
+                /*if score > balls[idx2].score {
+                    calcScore(balls[idx2].score)
+                    appendToAnimationArray(idx: idx2)
+                } else {
+                    calcScore(score)
+                    appendToAnimationArray(idx: idx1)
+                }*/
                 balls[idx2].score += score
-                calcScore(balls[idx2].score)
+                //calcScore(balls[idx2].score)
                 balls[idx1].score -= score
                 balls[idx1].color ^= balls[idx2].color
 
-                scoreAnimationData.append(ScoreData(score: balls[idx2].score, point: startingPositions[idx2], delta: ((increment / travelTime) * (Double(startingPositions[idx2].x) - Double(mainScorePosition.x)), (increment / travelTime) * (Double(startingPositions[idx2].y) - Double(mainScorePosition.y)))))
+                //scoreAnimationData.append(ScoreData(score: balls[idx2].score, point: startingPositions[idx2], delta: ((increment / travelTime) * (Double(startingPositions[idx2].x) - Double(mainScorePosition.x)), (increment / travelTime) * (Double(startingPositions[idx2].y) - Double(mainScorePosition.y)))))
                 //updatePositionScoreArrays(idx2)
             }
         }
@@ -748,7 +1004,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     func drawBalls() {
         var alpha: UInt32 = 0xff000000
         for ii in 0...((ROWS * COLUMNS) - 1) {
-            alpha = 0xff000000
+            alpha = 0xC0000000
 
             let iiDivideColumns = (Double(ii) / Double(COLUMNS)).rounded(.towardZero)
             let x = Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride
@@ -809,8 +1065,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
     @objc func run() {
         showNewBallAlpha += 5
-        if showNewBallAlpha > 0xff {
-            showNewBallAlpha = 0xff
+        if showNewBallAlpha > 0xC0 {
+            showNewBallAlpha = 0xC0
             showBallTimer?.invalidate()
             showBallTimer = nil
             showNewBallInProgress = false
