@@ -34,8 +34,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     var animateScoreTimer: Timer? = nil
     var showBallTimer: Timer? = nil
     var scoreTime: Double = 0
-    let increment = 0.025
-    let travelTime = 3.0
+    let timerSpeed = 0.001
     var showNewBallAlpha: UInt32 = 0
     var showNewBallInProgress = false
     var newBallCount = 0
@@ -56,6 +55,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
     //This is set in drawScore()
     var mainScorePosition = CGPoint(x: 0, y: 0)
+
+    let deltaLength = 1.5
 
     let tests = [0, 0, 0, 0,
                  0, 0, 0, 0,
@@ -272,7 +273,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     func drawScoreAnimation() {
         var count = 0
         for _ in scoreAnimationData {
-            if (round(scoreAnimationData[count].position.x) == round(mainScorePosition.x)) || (round(scoreAnimationData[count].position.y) == round(mainScorePosition.y)) {
+            if abs(scoreAnimationData[count].position.x - mainScorePosition.x) < 10 && abs(scoreAnimationData[count].position.y - mainScorePosition.y) < 10 {
                 displayScore += scoreAnimationData[count].score// = realScore
                 removeScoreElement(scoreAnimationData[count])
                 if displayScore > highScore { highScore = displayScore }
@@ -403,7 +404,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     }*/
 
     func beginAnimation() {
-        animateScoreTimer = Timer.scheduledTimer(timeInterval: increment, target: self, selector: #selector(animateScore), userInfo: nil, repeats: true)
+        animateScoreTimer = Timer.scheduledTimer(timeInterval: timerSpeed, target: self, selector: #selector(animateScore), userInfo: nil, repeats: true)
     }
 
     func calcScore(_ ballScore: Int) {
@@ -411,7 +412,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     }
 
     func appendToAnimationArray(idx: Int, score: Int, color: Int) {
-        scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((increment / travelTime) * (Double(startingPositions[idx].x) - Double(mainScorePosition.x)), (increment / travelTime) * (Double(startingPositions[idx].y) - Double(mainScorePosition.y))), color: color))
+        let distX = Double(startingPositions[idx].x - mainScorePosition.x)
+        let distY = Double(startingPositions[idx].y - mainScorePosition.y)
+        let distance = sqrt(pow(distX, 2) + pow(distY, 2))
+        scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * (distX), (deltaLength / distance) * distY), color: color))//(timerSpeed / travelTime) * (Double(startingPositions[idx].x) - Double(mainScorePosition.x)), (timerSpeed / travelTime) * (Double(startingPositions[idx].y) - Double(mainScorePosition.y))), color: color))
     }
 
     @objc func onSwipeLeft() {
