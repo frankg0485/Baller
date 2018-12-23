@@ -21,7 +21,9 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     let ROWS = 5
     let MAX_NEW_BALLS = 2
     let START_NUM = 4
-    let FONT_H: Double = 60
+    lazy var FONT_H: Double = {
+        return Double(frame.width / 6)
+    }()
     var x_stride: Double = 0
     var y_stride: Double = 0
 
@@ -104,7 +106,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         if isGameOver() && (once == false) {
             if SavedData.getHighScore() < highScore { SavedData.setHighScore(score: highScore) }
 
-            if !redrawBalls {
+            if !redrawBalls && scoreAnimationData.isEmpty {
                 once = true
                 animateScoreTimer?.invalidate()
                 animateScoreTimer = nil
@@ -718,7 +720,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
     func drawGrid() {
         x_stride = Double((mW/* - 2 * X_OFF*/) / Double(COLUMNS))
-        y_stride = x_stride//Double((mH/* - 2 * Y_OFF*/) / Double(ROWS))
+        y_stride = (mH * (428.75 / 647)) / Double(ROWS)//Double((mH/* - 2 * Y_OFF*/) / Double(ROWS))
 
         var x: Double = 0//X_OFF
         var y: Double = mH//Y_OFF
@@ -733,7 +735,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
         for _ in 0...COLUMNS {
             path.move(to: CGPoint(x: x, y: mH/*Y_OFF*/))
-            path.addLine(to: CGPoint(x: x, y: mH -  5 * y_stride/* - Y_OFF*/))
+            path.addLine(to: CGPoint(x: x, y: mH * (218.75 / 647)/* - Y_OFF*/))
             x += x_stride
         }
 
