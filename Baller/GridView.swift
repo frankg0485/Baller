@@ -58,7 +58,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     //This is set in drawScore()
     var mainScorePosition = CGPoint(x: 0, y: 0)
 
-    let deltaLength = 1.5
+    let deltaLength = 2.0
 
     let tests = [0, 0, 0, 0,
                  0, 0, 0, 0,
@@ -164,10 +164,11 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             balls[rdm].color = startColors[Int(arc4random_uniform(3))]
             balls[rdm].score = 1
         }
-        for i in 0...ROWS*COLUMNS - 1 {
+
+        /*for i in 0...ROWS*COLUMNS - 1 {
             balls[i].color = tests[i]
             balls[i].score = numOfColors(balls[i].color)
-        }
+        }*/
     }
 
     func drawScore(_ rect: CGRect) {
@@ -176,10 +177,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             NSAttributedStringKey.foregroundColor : UIColor.red
         ]*/
         let scoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "SCORE: \(displayScore)")
-        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...1))
+        /*scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...1))
         scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(2...3))
         scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(4...5))
-        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, scoreStr.length))
+        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, scoreStr.length))*/
         var halfLen = scoreStr.attributedSubstring(from: NSRange(location: 0, length: 6)).size().width / 2
         scoreStr.attributedSubstring(from: NSRange(location: 0, length: 6)).draw(at: CGPoint(x: rect.maxX / 3 - halfLen, y: 50))
         halfLen = scoreStr.attributedSubstring(from: NSRange(location: 7, length: scoreStr.length - 7)).size().width / 2
@@ -187,11 +188,11 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         scoreStr.attributedSubstring(from: NSRange(location: 7, length: scoreStr.length - 7)).draw(at: mainScorePosition)
 
         let highScoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "HIGH SCORE: \(highScore)")
-        print(scoreStr, highScoreStr)
+        /*print(scoreStr, highScoreStr)
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(3...6))
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...10))
-        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, highScoreStr.length))
+        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, highScoreStr.length))*/
         halfLen = highScoreStr.attributedSubstring(from: NSRange(location: 0, length: 12)).size().width / 2
         highScoreStr.attributedSubstring(from: NSRange(location: 0, length: 12)).draw(at: CGPoint(x: rect.maxX * 2 / 3 - halfLen, y: 50))
         halfLen = highScoreStr.attributedSubstring(from: NSRange(location: 12, length: highScoreStr.length - 12)).size().width / 2

@@ -49,52 +49,52 @@ class GameOverViewController: UIViewController {
 
     func getAttributedText() -> [NSMutableAttributedString] {
         let gameOverStr: NSMutableAttributedString = NSMutableAttributedString(string: "GAME OVER!")
-        gameOverStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
+        /*gameOverStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
         gameOverStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(3...6))
         gameOverStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...9))
-        gameOverStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, gameOverStr.length))
+        gameOverStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, gameOverStr.length))*/
 
         let scoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "SCORE: \(score)")
-        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...1))
+        /*scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...1))
         scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(2...3))
         scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(4...5))
-        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, scoreStr.length))
+        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, scoreStr.length))*/
 
         let highScoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "HIGH SCORE: \(highScore)")
-        highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
+        /*highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(3...6))
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...10))
-        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, highScoreStr.length))
+        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, highScoreStr.length))*/
 
         let playAgainStr: NSMutableAttributedString = NSMutableAttributedString(string: "PLAY AGAIN")
-        playAgainStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
+        /*playAgainStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
         playAgainStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(3...6))
         playAgainStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...9))
-        playAgainStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, playAgainStr.length))
+        playAgainStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)), range: NSMakeRange(0, playAgainStr.length))*/
 
         return [gameOverStr, scoreStr, highScoreStr, playAgainStr]
     }
 
     func fadeIn() {
-        view.alpha = 0
-        UIView.animate(withDuration: 1.0, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+        //view.alpha = 0
+        /*UIView.animate(withDuration: 0.5, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
             self.view.alpha = 1.0
         }, completion: { finished in
             if finished {
                 //Upon completion of the previous label fading in, the next one begins to fade in
-                UIView.animate(withDuration: 1.0, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+                UIView.animate(withDuration: 0.5, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
                     self.gameOverLabel.alpha = 1.0
                 }, completion: { finished in
                     if finished {
-                        UIView.animate(withDuration: 1.0, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+                        UIView.animate(withDuration: 0.5, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
                             self.scoreLabel.alpha = 1.0
                         }, completion: { finished in
                             if finished {
-                                UIView.animate(withDuration: 1.0, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+                                UIView.animate(withDuration: 0.5, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
                                     self.highScoreLabel.alpha = 1.0
                                 }, completion: { finished in
                                     if finished {
-                                        UIView.animate(withDuration: 1.0, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+                                        UIView.animate(withDuration: 0.5, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
                                             self.restartButton.alpha = 1.0
                                         }, completion: nil)
                                     }
@@ -104,7 +104,7 @@ class GameOverViewController: UIViewController {
                     }
                 })
             }
-        })
+        })*/
     }
     /*
     // MARK: - Navigation
