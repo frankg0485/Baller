@@ -15,10 +15,9 @@ protocol ModalHandler {
 }
 
 class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
-    let X_OFF: Double = 10
-    let Y_OFF: Double = 10
-    let COLUMNS = 4
-    let ROWS = 5
+    var X_OFF: Double = 0
+    var COLUMNS = 4
+    var ROWS = 5
     let MAX_NEW_BALLS = 2
     let START_NUM = 4
     lazy var FONT_H: Double = {
@@ -81,7 +80,14 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         var position: CGPoint
         var deltaX: Double
         var deltaY: Double
-        var ballDiameter: Double = 25
+        lazy var ballDiameter: Double = {
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                return 25
+            } else if UIDevice.current.userInterfaceIdiom == .pad {
+                return 75
+            }
+            return 0
+        }()
         var color: Int
 
         init(score: Int, point: CGPoint, delta: (Double, Double), color: Int) {
@@ -172,6 +178,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     }
 
     func drawScore(_ rect: CGRect) {
+        var fontSize = 0
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            fontSize = 15
+        } else if UIDevice.current.userInterfaceIdiom == .pad {
+            fontSize = 40
+        }
         /*let textAttributes = [
             NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
             NSAttributedStringKey.foregroundColor : UIColor.red
@@ -179,8 +191,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         let scoreStr: NSMutableAttributedString = NSMutableAttributedString(string: "SCORE: \(displayScore)")
         /*scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...1))
         scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(2...3))
-        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(4...5))
-        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, scoreStr.length))*/
+        scoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(4...5))*/
+        scoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(fontSize)), range: NSMakeRange(0, scoreStr.length))
         var halfLen = scoreStr.attributedSubstring(from: NSRange(location: 0, length: 6)).size().width / 2
         scoreStr.attributedSubstring(from: NSRange(location: 0, length: 6)).draw(at: CGPoint(x: rect.maxX / 3 - halfLen, y: 50))
         halfLen = scoreStr.attributedSubstring(from: NSRange(location: 7, length: scoreStr.length - 7)).size().width / 2
@@ -191,8 +203,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         /*print(scoreStr, highScoreStr)
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.red, range: NSRange(0...2))
         highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.green, range: NSRange(3...6))
-        highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...10))
-        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(FONT_H / 3)), range: NSMakeRange(0, highScoreStr.length))*/
+        highScoreStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.blue, range: NSRange(7...10))*/
+        highScoreStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: CGFloat(fontSize)), range: NSMakeRange(0, highScoreStr.length))
         halfLen = highScoreStr.attributedSubstring(from: NSRange(location: 0, length: 12)).size().width / 2
         highScoreStr.attributedSubstring(from: NSRange(location: 0, length: 12)).draw(at: CGPoint(x: rect.maxX * 2 / 3 - halfLen, y: 50))
         halfLen = highScoreStr.attributedSubstring(from: NSRange(location: 12, length: highScoreStr.length - 12)).size().width / 2
@@ -270,7 +282,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             UIColor(hex: colors[2]).set()
             arc3.fill()
         }
-
     }
 
     func drawScoreAnimation() {
@@ -285,11 +296,16 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             }
             let scoreStr = "\(scoreAnimationData[count].score)"
             let finalStr: NSMutableAttributedString = NSMutableAttributedString(string: scoreStr)
+            finalStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.black, range: NSRange(0..<scoreStr.count))
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                finalStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: UIFont.systemFontSize), range: NSRange(0..<scoreStr.count))
+            } else if UIDevice.current.userInterfaceIdiom == .pad {
+                finalStr.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: UIFont.systemFontSize * 2), range: NSRange(0..<scoreStr.count))
+            }
 
             drawSmallBall(index: count, strSize: finalStr.size())
 
-            finalStr.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.black, range: NSRange(0..<scoreStr.count))
-            finalStr.draw(at: CGPoint(x: scoreAnimationData[count].position.x/*CGPoint(x: (scoreTime / travelTime) * Double(mainScorePosition.x - data.position.x) + Double(data.position.x)*/, y: scoreAnimationData[count].position.y/*(scoreTime / travelTime) * Double(mainScorePosition.y - data.position.y) + Double(position.y))*/))
+            finalStr.draw(at: CGPoint(x: scoreAnimationData[count].position.x, y: scoreAnimationData[count].position.y))
             count += 1
         }
     }
@@ -418,7 +434,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         let distX = Double(startingPositions[idx].x - mainScorePosition.x)
         let distY = Double(startingPositions[idx].y - mainScorePosition.y)
         let distance = sqrt(pow(distX, 2) + pow(distY, 2))
-        scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * (distX), (deltaLength / distance) * distY), color: color))//(timerSpeed / travelTime) * (Double(startingPositions[idx].x) - Double(mainScorePosition.x)), (timerSpeed / travelTime) * (Double(startingPositions[idx].y) - Double(mainScorePosition.y))), color: color))
+
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * (distX), (deltaLength / distance) * distY), color: color))
+        } else if UIDevice.current.userInterfaceIdiom == .pad {
+            scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * distX * 3, (deltaLength / distance) * distY * 3), color: color))
+        }
     }
 
     @objc func onSwipeLeft() {
@@ -721,22 +742,33 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
     func drawGrid() {
         x_stride = Double((mW/* - 2 * X_OFF*/) / Double(COLUMNS))
-        y_stride = (mH * (428.75 / 647)) / Double(ROWS)//Double((mH/* - 2 * Y_OFF*/) / Double(ROWS))
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            y_stride = Double((mH * 2/3) / Double(ROWS))//(mH * (428.75 / 647)) / Double(ROWS)
+        } else if UIDevice.current.userInterfaceIdiom == .pad {
+            y_stride = Double((mH * 5/6) / Double(ROWS))
+        }
 
-        var x: Double = 0//X_OFF
+        if x_stride > y_stride {
+            x_stride = y_stride
+            X_OFF = (mW - Double(COLUMNS) * y_stride) / 2
+        } else {
+            y_stride = x_stride
+        }
+
+        var x: Double = X_OFF
         var y: Double = mH//Y_OFF
 
         let path = UIBezierPath()
 
         for _ in 0...ROWS {
-            path.move(to: CGPoint(x: 0/*Y_OFF*/, y: y))
-            path.addLine(to: CGPoint(x: mW/* - X_OFF*/, y: y))
+            path.move(to: CGPoint(x: x, y: y))
+            path.addLine(to: CGPoint(x: mW - X_OFF, y: y))
             y -= y_stride
         }
 
         for _ in 0...COLUMNS {
             path.move(to: CGPoint(x: x, y: mH/*Y_OFF*/))
-            path.addLine(to: CGPoint(x: x, y: mH * (218.75 / 647)/* - Y_OFF*/))
+            path.addLine(to: CGPoint(x: x, y: mH - y_stride * Double(ROWS)))// * (218.75 / 647)))
             x += x_stride
         }
 
@@ -828,7 +860,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             alpha = 0xC0000000
 
             let iiDivideColumns = (Double(ii) / Double(COLUMNS)).rounded(.towardZero)
-            let x = Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride
+            let x = Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride + X_OFF
             let y = mH - Double(ROWS) * y_stride + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)
             startingPositions[ii] = CGPoint(x: x, y: y)
 
