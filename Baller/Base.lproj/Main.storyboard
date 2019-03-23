@@ -35,16 +35,16 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zKD-XI-x7u" customClass="GridView" customModule="Baller" customModuleProvider="target">
-                                <rect key="frame" x="16" y="64" width="343" height="583"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="zKD-XI-x7u" secondAttribute="trailing" constant="16" id="2gh-ah-lsF"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="zKD-XI-x7u" secondAttribute="trailing" id="2gh-ah-lsF"/>
                             <constraint firstItem="zKD-XI-x7u" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="cEh-Xg-ati"/>
-                            <constraint firstItem="zKD-XI-x7u" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="kTW-Qi-dKZ"/>
-                            <constraint firstAttribute="bottom" secondItem="zKD-XI-x7u" secondAttribute="bottom" constant="20" symbolic="YES" id="mFt-Vm-vdj"/>
+                            <constraint firstItem="zKD-XI-x7u" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="kTW-Qi-dKZ"/>
+                            <constraint firstAttribute="bottom" secondItem="zKD-XI-x7u" secondAttribute="bottom" id="mFt-Vm-vdj"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>

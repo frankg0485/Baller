@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "GridView.onSwipeBottom():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "index + current * COLUMNS">
+            </PersistentString>
+            <PersistentString
+               value = "index + last * COLUMNS">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.draw(_:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "balls.isEmpty">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.init(coder:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "arc4random_uniform(3) + 1">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.mergeMultiColor(idx1:idx2:):GridView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawBall(x:y:score:color_code:alpha:rect:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "color[0]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawBalls(_:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "balls[0].score">
+            </PersistentString>
+            <PersistentString
+               value = "balls[i].color">
+            </PersistentString>
+            <PersistentString
+               value = "Y_OFF + ((ii / COLUMNS) % ROWS) * y_stride">
+            </PersistentString>
+            <PersistentString
+               value = "balls.isEmpty">
+            </PersistentString>
+            <PersistentString
+               value = "X_OFF + (ii % COLUMNS) * x_stride">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.init(frame:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "COLUMNS * ROWS - 1">
+            </PersistentString>
+            <PersistentString
+               value = "balls.count">
+            </PersistentString>
+            <PersistentString
+               value = "balls[19].color">
+            </PersistentString>
+            <PersistentString
+               value = "balls.isEmpty">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawBalls():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "((Double(ii) / Double(COLUMNS))).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride">
+            </PersistentString>
+            <PersistentString
+               value = "Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))">
+            </PersistentString>
+            <PersistentString
+               value = "Double(ii)">
+            </PersistentString>
+            <PersistentString
+               value = "Double(COLUMNS)">
+            </PersistentString>
+            <PersistentString
+               value = "((ii / COLUMNS) % ROWS) * Int(y_stride)">
+            </PersistentString>
+            <PersistentString
+               value = "Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawGrid():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "mW">
+            </PersistentString>
+            <PersistentString
+               value = "x_stride - 2 * PADDING">
+            </PersistentString>
+            <PersistentString
+               value = "mH">
+            </PersistentString>
+            <PersistentString
+               value = "y_stride - 2 * PADDING">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawBall(x:y:score:color_code:alpha:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "x_stride">
+            </PersistentString>
+            <PersistentString
+               value = "y_stride">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.animateScore():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "scoreTime * Double(mainScorePosition.x - position.x)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawScoreAnimation():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "mainScorePosition.x - startingPositions[count].x">
+            </PersistentString>
+            <PersistentString
+               value = "startingPositions[count].x">
+            </PersistentString>
+            <PersistentString
+               value = "CGFloat(increment) * (mainScorePosition.x - startingPositions[scoreAnimationData[count].posIndex].x) / CGFloat(travelTime)">
+            </PersistentString>
+            <PersistentString
+               value = "travelTime">
+            </PersistentString>
+            <PersistentString
+               value = "startingPositions[scoreAnimationData[count].posIndex].x">
+            </PersistentString>
+            <PersistentString
+               value = "scoreAnimationData[count].position">
+            </PersistentString>
+            <PersistentString
+               value = "mainScorePosition.x">
+            </PersistentString>
+            <PersistentString
+               value = "increment">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawBall(_:color:):GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "color == UIColor.blue">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.setNeedsDisplay():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.frame.height">
+            </PersistentString>
+            <PersistentString
+               value = "self.frame.width">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.onSwipeLeft():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "balls[index + current].score">
+            </PersistentString>
+            <PersistentString
+               value = "balls[last].score">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.onSwipeRight():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "index - (COLUMNS - 1)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.drawBall(_:coordinates:color:):GridView.swift">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
