@@ -64,6 +64,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                  0, 0, 0, 0,
                  0, 0, 0, 0,
                  1, 1, 1, 1]
+    let PADDING: Double = 5
 
     private struct Ball: Equatable {
         var color: Int
@@ -104,11 +105,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         // Drawing code
-        drawScoreAnimation()
-        drawScore(rect)
-        setSizeVars()
-        drawGrid()
-        drawBalls()
         if isGameOver() && (once == false) {
             if SavedData.getHighScore() < highScore { SavedData.setHighScore(score: highScore) }
 
@@ -123,6 +119,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                 presentGameOver()
             } else { redrawBalls = false }
         }
+
+        drawScore(rect)
+        setSizeVars()
+        drawGrid()
+        drawScoreAnimation()
+        drawBalls()
         //drawBall(x: X_OFF, y: Y_OFF, score: 0, color_code: 4, alpha: 0xff000000, rect: rect)
         //showBallTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(run), userInfo: nil, repeats: true)
     }
@@ -289,8 +291,8 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         for _ in scoreAnimationData {
             if abs(scoreAnimationData[count].position.x - mainScorePosition.x) < 10 && abs(scoreAnimationData[count].position.y - mainScorePosition.y) < 10 {
                 displayScore += scoreAnimationData[count].score// = realScore
-                removeScoreElement(scoreAnimationData[count])
                 if displayScore > highScore { highScore = displayScore }
+                removeScoreElement(scoreAnimationData[count])
                 setNeedsDisplay()
                 continue
             }
@@ -722,13 +724,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         }
     }
 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            let position = touch.location(in: self)
-            print(position.x)
-            print(position.y)
-        }
-    }
     override func setNeedsDisplay() {
         super.setNeedsDisplay()
 
@@ -756,28 +751,38 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         }
 
         var x: Double = X_OFF
-        var y: Double = mH//Y_OFF
+        var y: Double = mH - Double(ROWS) * y_stride - PADDING * 2//Y_OFF
 
-        let path = UIBezierPath()
+        let path = UIBezierPath(rect: CGRect(x: x - PADDING, y: y - PADDING, width: mW - 2 * x + PADDING * 2, height: mH - y))
+        path.close()
+        UIColor(red: 235/255, green: 235/255, blue: 235/255, alpha: 1).set()
+        path.fill()
 
-        for _ in 0...ROWS {
+        for _ in 0...ROWS - 1 {
+            for _ in 0...COLUMNS - 1 {
+                let path2 = UIBezierPath(rect: CGRect(x: x + PADDING, y: y + PADDING, width: x_stride - 2 * PADDING, height: y_stride - 2 * PADDING))
+                path2.close()
+                UIColor.white.set()
+                path2.fill()
+                x += x_stride
+            }
+            x = X_OFF
+            y += y_stride
+        }
+
+        /*for _ in 0...ROWS {
             path.move(to: CGPoint(x: x, y: y))
             path.addLine(to: CGPoint(x: mW - X_OFF, y: y))
             y -= y_stride
         }
 
         for _ in 0...COLUMNS {
-            path.move(to: CGPoint(x: x, y: mH/*Y_OFF*/))
-            path.addLine(to: CGPoint(x: x, y: mH - y_stride * Double(ROWS)))// * (218.75 / 647)))
+            path.move(to: CGPoint(x: x, y: y/*Y_OFF*/))
+            path.addLine(to: CGPoint(x: x, y: y - y_stride * Double(ROWS)))// * (218.75 / 647)))
             x += x_stride
-        }
-
-        path.close()
-        UIColor.black.set()
-        path.stroke()
+        }*/
     }
 
-    let PADDING: Double = 5
     func drawBall(x: Double, y: Double, score: Int, color_code: Int, alpha: UInt32) {
         if color_code == 0 { return }
 
@@ -797,10 +802,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             colors += 1
         }
 
-        let xx = x + PADDING
-        let yy = y + PADDING
-        let xx_stride = x_stride - 2 * PADDING
-        let yy_stride = y_stride - 2 * PADDING
+        let xx = x + PADDING + 5
+        let yy = y + PADDING + 5
+        let xx_stride = x_stride - 2 * PADDING - 10
+        let yy_stride = y_stride - 2 * PADDING - 10
 
         let textAttributes = [
             NSAttributedString.Key.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
@@ -861,7 +866,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
             let iiDivideColumns = (Double(ii) / Double(COLUMNS)).rounded(.towardZero)
             let x = Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS)) * x_stride + X_OFF
-            let y = mH - Double(ROWS) * y_stride + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)
+            let y = mH - Double(ROWS) * y_stride + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride) - PADDING * 2
             startingPositions[ii] = CGPoint(x: x, y: y)
 
             if balls[ii].color == 0 { continue }
