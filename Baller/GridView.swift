@@ -105,21 +105,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         // Drawing code
-        if isGameOver() && (once == false) {
-            if SavedData.getHighScore() < highScore { SavedData.setHighScore(score: highScore) }
-
-            if !redrawBalls && scoreAnimationData.isEmpty {
-                once = true
-                animateScoreTimer?.invalidate()
-                animateScoreTimer = nil
-                showBallTimer?.invalidate()
-                showBallTimer = nil
-
-                usleep(250000)
-                presentGameOver()
-            } else { redrawBalls = false }
-        }
-
         drawScore(rect)
         setSizeVars()
         drawGrid()
@@ -332,6 +317,19 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             //resetScoreAnimationData()
         }*/
         calcAnimation()
+        if isGameOver() {
+            if SavedData.getHighScore() < highScore { SavedData.setHighScore(score: highScore) }
+
+            if !redrawBalls && scoreAnimationData.isEmpty {
+                animateScoreTimer?.invalidate()
+                animateScoreTimer = nil
+                showBallTimer?.invalidate()
+                showBallTimer = nil
+
+                usleep(250000)
+                presentGameOver()
+            } else { redrawBalls = false }
+        }
         setNeedsDisplay()
     }
 
