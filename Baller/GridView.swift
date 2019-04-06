@@ -271,14 +271,17 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         }
     }
 
+    //TODO: remove elements later
     func drawScoreAnimation() {
-        var count = 0
+        var count = -1
+        var indexesToBeRemoved: [Int] = []
         for _ in scoreAnimationData {
-            if abs(scoreAnimationData[count].position.x - mainScorePosition.x) < 10 && abs(scoreAnimationData[count].position.y - mainScorePosition.y) < 10 {
+            count += 1
+            if abs(scoreAnimationData[count].position.x - mainScorePosition.x) < 20 && abs(scoreAnimationData[count].position.y - mainScorePosition.y) < 20 {
                 displayScore += scoreAnimationData[count].score// = realScore
                 if displayScore > highScore { highScore = displayScore }
-                removeScoreElement(scoreAnimationData[count])
-                setNeedsDisplay()
+                indexesToBeRemoved.append(count)
+                //setNeedsDisplay()
                 continue
             }
             let scoreStr = "\(scoreAnimationData[count].score)"
@@ -293,7 +296,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             drawSmallBall(index: count, strSize: finalStr.size())
 
             finalStr.draw(at: CGPoint(x: scoreAnimationData[count].position.x, y: scoreAnimationData[count].position.y))
-            count += 1
+        }
+
+        for index in indexesToBeRemoved {
+            scoreAnimationData.remove(at: index)
         }
     }
 
