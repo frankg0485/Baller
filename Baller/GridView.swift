@@ -35,7 +35,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     var animateScoreTimer: Timer? = nil
     var showBallTimer: Timer? = nil
     var scoreTime: Double = 0
-    let timerSpeed = 0.001
+
+    //This is set in the init
+    var timerSpeed = 0.0
+
     var showNewBallAlpha: UInt32 = 0
     var showNewBallInProgress = false
     var newBallCount = 0
@@ -57,7 +60,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     //This is set in drawScore()
     var mainScorePosition = CGPoint(x: 0, y: 0)
 
-    let deltaLength = 2.0
+    let deltaLength = 4.0
 
     let tests = [0, 0, 0, 0,
                  0, 0, 0, 0,
@@ -110,8 +113,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         drawGrid()
         drawScoreAnimation()
         drawBalls()
-        //drawBall(x: X_OFF, y: Y_OFF, score: 0, color_code: 4, alpha: 0xff000000, rect: rect)
-        //showBallTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(run), userInfo: nil, repeats: true)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -145,6 +146,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         scoreAnimationData = [ScoreData]()
         startingPositions = Array(repeating: CGPoint(x: 0, y: 0), count: ROWS * COLUMNS)
 
+        timerSpeed = getTimerSpeed()
         beginAnimation()
 
         var rdmNumbers: Set<Int> = []
@@ -164,13 +166,14 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         }*/
     }
 
+    func getTimerSpeed() -> Double {
+        //765.1888655750291 -> iphone 6 distance between opposite corners
+        return Double((0.01*765.1888655750291) / sqrt(pow(UIScreen.main.bounds.width, 2) + pow(UIScreen.main.bounds.height, 2)) * 2)
+        //0.001 * 765.1888655750291 = x * (distance between screen corners)
+    }
+
     func drawScore(_ rect: CGRect) {
-        var fontSize = 0
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            fontSize = 15
-        } else if UIDevice.current.userInterfaceIdiom == .pad {
-            fontSize = 40
-        }
+        let fontSize = 40/1336 * frame.height
         /*let textAttributes = [
             NSAttributedStringKey.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
             NSAttributedStringKey.foregroundColor : UIColor.red
@@ -298,7 +301,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             finalStr.draw(at: CGPoint(x: scoreAnimationData[count].position.x, y: scoreAnimationData[count].position.y))
         }
 
-        for index in indexesToBeRemoved {
+        for index in indexesToBeRemoved.reversed() {
             scoreAnimationData.remove(at: index)
         }
     }
@@ -363,10 +366,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "GameOverViewController") as! GameOverViewController
         vc.modalPresentationStyle = UIModalPresentationStyle.popover
+        vc.preferredContentSize = CGSize(width: 300/375 * frame.width, height: 400/667 * frame.height)
         vc.highScore = highScore
         vc.score = displayScore
         vc.FONT_H = FONT_H
         vc.delegate = self
+
         if let popoverPresentationController =  vc.popoverPresentationController {
             popoverPresentationController.delegate = self
             popoverPresentationController.sourceView  = currentController.view
@@ -441,11 +446,12 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         let distY = Double(startingPositions[idx].y - mainScorePosition.y)
         let distance = sqrt(pow(distX, 2) + pow(distY, 2))
 
-        if UIDevice.current.userInterfaceIdiom == .phone {
+        scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * distX, (deltaLength / distance) * distY), color: color))
+        /*if UIDevice.current.userInterfaceIdiom == .phone {
             scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * (distX), (deltaLength / distance) * distY), color: color))
         } else if UIDevice.current.userInterfaceIdiom == .pad {
-            scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * distX * 3, (deltaLength / distance) * distY * 3), color: color))
-        }
+            scoreAnimationData.append(ScoreData(score: score, point: startingPositions[idx], delta: ((deltaLength / distance) * distX * 6, (deltaLength / distance) * distY * 6), color: color))
+        }*/
     }
 
     @objc func onSwipeLeft() {
