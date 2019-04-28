@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		011D21F62145D8E400B6805A /* SavedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011D21F52145D8E400B6805A /* SavedData.swift */; };
+		0156032D2275157300CEC058 /* SwipeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0156032C2275157200CEC058 /* SwipeHandler.swift */; };
 		01C5D1A620EAE27C002EF02D /* GameOverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C5D1A520EAE27C002EF02D /* GameOverViewController.swift */; };
 		01E6C8AF20D085A500C587ED /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E6C8AE20D085A500C587ED /* AppDelegate.swift */; };
 		01E6C8B120D085A500C587ED /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E6C8B020D085A500C587ED /* ViewController.swift */; };
@@ -38,6 +39,7 @@
 
 /* Begin PBXFileReference section */
 		011D21F52145D8E400B6805A /* SavedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedData.swift; sourceTree = "<group>"; };
+		0156032C2275157200CEC058 /* SwipeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeHandler.swift; sourceTree = "<group>"; };
 		01C5D1A520EAE27C002EF02D /* GameOverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverViewController.swift; sourceTree = "<group>"; };
 		01E6C8AB20D085A500C587ED /* Baller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Baller.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		01E6C8AE20D085A500C587ED /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 			children = (
 				01E6C8AE20D085A500C587ED /* AppDelegate.swift */,
 				01E6C8DC20D088C800C587ED /* GridView.swift */,
+				0156032C2275157200CEC058 /* SwipeHandler.swift */,
 				011D21F52145D8E400B6805A /* SavedData.swift */,
 				01E6C8B020D085A500C587ED /* ViewController.swift */,
 				01C5D1A520EAE27C002EF02D /* GameOverViewController.swift */,
@@ -273,6 +276,7 @@
 				01E6C8DD20D088C800C587ED /* GridView.swift in Sources */,
 				01E6C8AF20D085A500C587ED /* AppDelegate.swift in Sources */,
 				011D21F62145D8E400B6805A /* SavedData.swift in Sources */,
+				0156032D2275157300CEC058 /* SwipeHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
