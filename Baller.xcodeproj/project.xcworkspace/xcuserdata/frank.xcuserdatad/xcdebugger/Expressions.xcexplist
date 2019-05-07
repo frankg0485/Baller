@@ -132,22 +132,25 @@
          contextName = "GridView.drawBalls():GridView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "((Double(ii) / Double(COLUMNS))).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride">
+               value = "Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)">
             </PersistentString>
             <PersistentString
                value = "Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))">
             </PersistentString>
             <PersistentString
-               value = "Double(ii)">
+               value = "((ii / COLUMNS) % ROWS) * Int(y_stride)">
+            </PersistentString>
+            <PersistentString
+               value = "balls[ii].type">
             </PersistentString>
             <PersistentString
                value = "Double(COLUMNS)">
             </PersistentString>
             <PersistentString
-               value = "Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)">
+               value = "((Double(ii) / Double(COLUMNS))).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride">
             </PersistentString>
             <PersistentString
-               value = "((ii / COLUMNS) % ROWS) * Int(y_stride)">
+               value = "Double(ii)">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

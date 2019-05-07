@@ -23,11 +23,13 @@ struct Ball: Equatable {
     var color: Int
     var score: Int
     var type: BallType
+    var numberOfSwipes: Int
 
     init(_ type: BallType) {
         self.score = 0
         self.color = 0
         self.type = type
+        numberOfSwipes = 0
     }
 }
 
@@ -61,6 +63,7 @@ let ROWS = 5
 var balls: [Ball] = []
 var scoreAnimationData = [ScoreData]()
 var realScore = 0
+var numberOfMoves = 0
 var startingPositions = [CGPoint]()
 //This is set in drawScore()
 var mainScorePosition = CGPoint(x: 0, y: 0)
@@ -133,6 +136,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
     func gridInit() {
         realScore = 0
+        numberOfMoves = 0
         displayScore = 0
         once = false
         redrawBalls = true
@@ -384,7 +388,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
     func isGameOver() -> Bool {
         for i in 0...balls.count - 2 {
-            if balls[i].color == 0 {
+            if GridView.checkWhiteBall(i) {
                 return false
             }
 
@@ -436,12 +440,53 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         animateScoreTimer = Timer.scheduledTimer(timeInterval: timerSpeed, target: self, selector: #selector(animateScore), userInfo: nil, repeats: true)
     }
 
+    static func checkWhiteBall(_ index: Int) -> Bool { return balls[index].color == 0 && balls[index].type == .NORMAL }
+
+    static func clearBall(_ index: Int) {
+        balls[index].color = 0
+        balls[index].score = 0
+        balls[index].type = .NORMAL
+        balls[index].numberOfSwipes = 0
+    }
+
+    func addRockBall() {
+        var index = Int.random(in: 0..<balls.count)
+        while balls[index].color != 0 {
+            index = Int.random(in: 0..<balls.count)
+        }
+        GridView.clearBall(index)
+        balls[index].type = .ROCK
+    }
+
+    func incrementBallSwipes() {
+        var x = 0
+        for _ in balls {
+            balls[x].numberOfSwipes += 1
+            x += 1
+        }
+    }
+
+    func checkRockBall() {
+        var x = 0
+        for _ in balls {
+            if balls[x].type == .ROCK {
+                if balls[x].numberOfSwipes == 15 {
+                    GridView.clearBall(x)
+                }
+            }
+            x += 1
+        }
+    }
+
     @objc func onSwipeLeft() {
         showBallTimer?.invalidate()
         showBallTimer = nil
 
         SwipeHandler.swipeLeft()
+        numberOfMoves += 1
 
+        incrementBallSwipes()
+        checkRockBall()
         addRandomBall()
         setNeedsDisplay()
     }
@@ -451,7 +496,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         showBallTimer = nil
 
         SwipeHandler.swipeRight()
+        numberOfMoves += 1
 
+        incrementBallSwipes()
+        checkRockBall()
         addRandomBall()
         setNeedsDisplay()
     }
@@ -461,7 +509,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         showBallTimer = nil
 
         SwipeHandler.swipeTop()
+        numberOfMoves += 1
 
+        incrementBallSwipes()
+        checkRockBall()
         addRandomBall()
         setNeedsDisplay()
     }
@@ -471,7 +522,10 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         showBallTimer = nil
 
         SwipeHandler.swipeBottom()
+        numberOfMoves += 1
 
+        incrementBallSwipes()
+        checkRockBall()
         addRandomBall()
         setNeedsDisplay()
     }
@@ -539,79 +593,89 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         }*/
     }
 
-    func drawBall(x: Double, y: Double, score: Int, color_code: Int, alpha: UInt32) {
-        if color_code == 0 { return }
-
-        var color: [UInt32] = [alpha, alpha, alpha]
-        var colors = 0
-
-        if ((color_code & 1) == 1) {
-            color[colors] |= 0xff0000
-            colors += 1
-        }
-        if ((color_code & 2) == 2) {
-            color[colors] |= 0x00ff00
-            colors += 1
-        }
-        if ((color_code & 4) == 4) {
-            color[colors] |= 0x0000ff
-            colors += 1
-        }
+    func drawBall(x: Double, y: Double, score: Int, color_code: Int, alpha: UInt32, type: BallType) {
+        if color_code == 0  && type == .NORMAL { return }
 
         let xx = x + PADDING + 5
         let yy = y + PADDING + 5
         let xx_stride = x_stride - 2 * PADDING - 10
         let yy_stride = y_stride - 2 * PADDING - 10
 
-        let textAttributes = [
-            NSAttributedString.Key.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
-            NSAttributedString.Key.foregroundColor : UIColor.white
-        ]
-
         let center = CGPoint(x: xx + xx_stride / 2, y: yy + yy_stride / 2)
         let radius = CGFloat(xx_stride / 2)
-        if colors == 1 {
+
+        switch type {
+        case .ROCK:
             var arc = UIBezierPath()
             arc = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
-            UIColor(hex: color[0]).set()
+            UIColor.black.set()
             arc.stroke()
             arc.fill()
+        case.NORMAL:
+            var color: [UInt32] = [alpha, alpha, alpha]
+            var colors = 0
 
-            let text_width = Double(String(score).size(withAttributes: textAttributes).width)
-            String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
-        } else if (colors == 2) {
-            let arc1 = UIBezierPath()
-            arc1.addArc(withCenter: center, radius: radius, startAngle: CGFloat.pi / 2, endAngle: 3 * CGFloat.pi / 2, clockwise: true)
-            arc1.close()
-            UIColor(hex: color[0]).set()
-            arc1.fill()
+            if ((color_code & 1) == 1) {
+                color[colors] |= 0xff0000
+                colors += 1
+            }
+            if ((color_code & 2) == 2) {
+                color[colors] |= 0x00ff00
+                colors += 1
+            }
+            if ((color_code & 4) == 4) {
+                color[colors] |= 0x0000ff
+                colors += 1
+            }
 
-            let arc2 = UIBezierPath()
-            arc2.addArc(withCenter: center, radius: radius, startAngle: 3 * CGFloat.pi / 2, endAngle: 5 * CGFloat.pi / 2, clockwise: true)
-            arc2.close()
-            UIColor(hex: color[1]).set()
-            arc2.fill()
-        } else {
-            let arc1 = UIBezierPath()
-            arc1.addArc(withCenter: center, radius: radius, startAngle: CGFloat.pi / 6, endAngle: 5 * CGFloat.pi / 6, clockwise: true)
-            arc1.addLine(to: center)
-            arc1.close()
-            UIColor(hex: color[0]).set()
-            arc1.fill()
+            let textAttributes = [
+                NSAttributedString.Key.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
+                NSAttributedString.Key.foregroundColor : UIColor.white
+            ]
 
-            let arc2 = UIBezierPath()
-            arc2.addArc(withCenter: center, radius: radius, startAngle: 5 * CGFloat.pi / 6, endAngle: 3 * CGFloat.pi / 2, clockwise: true)
-            arc2.addLine(to: center)
-            arc2.close()
-            UIColor(hex: color[1]).set()
-            arc2.fill()
+            if colors == 1 {
+                var arc = UIBezierPath()
+                arc = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
+                UIColor(hex: color[0]).set()
+                arc.stroke()
+                arc.fill()
 
-            let arc3 = UIBezierPath()
-            arc3.addArc(withCenter: center, radius: radius, startAngle: 3 * CGFloat.pi / 2, endAngle: CGFloat.pi / 6, clockwise: true)
-            arc3.addLine(to: center)
-            arc3.close()
-            UIColor(hex: color[2]).set()
-            arc3.fill()
+                let text_width = Double(String(score).size(withAttributes: textAttributes).width)
+                String(score).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
+            } else if (colors == 2) {
+                let arc1 = UIBezierPath()
+                arc1.addArc(withCenter: center, radius: radius, startAngle: CGFloat.pi / 2, endAngle: 3 * CGFloat.pi / 2, clockwise: true)
+                arc1.close()
+                UIColor(hex: color[0]).set()
+                arc1.fill()
+
+                let arc2 = UIBezierPath()
+                arc2.addArc(withCenter: center, radius: radius, startAngle: 3 * CGFloat.pi / 2, endAngle: 5 * CGFloat.pi / 2, clockwise: true)
+                arc2.close()
+                UIColor(hex: color[1]).set()
+                arc2.fill()
+            } else {
+                let arc1 = UIBezierPath()
+                arc1.addArc(withCenter: center, radius: radius, startAngle: CGFloat.pi / 6, endAngle: 5 * CGFloat.pi / 6, clockwise: true)
+                arc1.addLine(to: center)
+                arc1.close()
+                UIColor(hex: color[0]).set()
+                arc1.fill()
+
+                let arc2 = UIBezierPath()
+                arc2.addArc(withCenter: center, radius: radius, startAngle: 5 * CGFloat.pi / 6, endAngle: 3 * CGFloat.pi / 2, clockwise: true)
+                arc2.addLine(to: center)
+                arc2.close()
+                UIColor(hex: color[1]).set()
+                arc2.fill()
+
+                let arc3 = UIBezierPath()
+                arc3.addArc(withCenter: center, radius: radius, startAngle: 3 * CGFloat.pi / 2, endAngle: CGFloat.pi / 6, clockwise: true)
+                arc3.addLine(to: center)
+                arc3.close()
+                UIColor(hex: color[2]).set()
+                arc3.fill()
+            }
         }
     }
 
@@ -625,7 +689,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
             let y = mH - Double(ROWS) * y_stride + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride) - PADDING * 2
             startingPositions[ii] = CGPoint(x: x, y: y)
 
-            if balls[ii].color == 0 { continue }
+            if GridView.checkWhiteBall(ii) { continue }
             if showNewBallInProgress && (newBallCount > 0) {
                 for jj in 0...newBallCount - 1 {
                     if newBallIndex[jj] == ii {
@@ -634,7 +698,7 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                     }
                 }
             }
-            drawBall(x: x, y: y, score: balls[ii].score, color_code: balls[ii].color, alpha: alpha)
+            drawBall(x: x, y: y, score: balls[ii].score, color_code: balls[ii].color, alpha: alpha, type: balls[ii].type)
         }
     }
 
@@ -657,14 +721,19 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         var count = 0
         var start = Int(arc4random_uniform(UInt32(ROWS * COLUMNS)))
         for _ in 0...ROWS * COLUMNS - 1 {
-            if balls[start].color == 0 {
+            if GridView.checkWhiteBall(start) {
                 balls[start].color = Int(arc4random_uniform(7) + 1)
                 balls[start].score = GridView.numOfColors(balls[start].color)
+                balls[start].numberOfSwipes = 0
 
                 newBallIndex[count] = start
 
                 count += 1
                 if (count == MAX_NEW_BALLS) { break }
+                else if (numberOfMoves % 10 == 0) {
+                    addRockBall()
+                    break
+                }
             }
             start += 7
             start %= (ROWS * COLUMNS)
