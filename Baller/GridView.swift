@@ -17,6 +17,7 @@ protocol ModalHandler {
 enum BallType {
     case NORMAL
     case ROCK
+    case BOMB
 }
 
 struct Ball: Equatable {
@@ -83,6 +84,9 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
     var mCenterY: Double = 0
     var mW: Double = 0
     var mH: Double = 0
+
+    var bombBallTimer: Timer? = nil
+    var secondsUntilExplode = 10
 
     var animateScoreTimer: Timer? = nil
     var showBallTimer: Timer? = nil
@@ -449,13 +453,93 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         balls[index].numberOfSwipes = 0
     }
 
-    func addRockBall() {
-        var index = Int.random(in: 0..<balls.count)
-        while balls[index].color != 0 {
-            index = Int.random(in: 0..<balls.count)
-        }
-        GridView.clearBall(index)
+    func addRockBall(_ index: Int) {
         balls[index].type = .ROCK
+        balls[index].color = 0
+        balls[index].score = 0
+    }
+
+    func addBombBall(_ index: Int) {
+        balls[index].type = .BOMB
+        balls[index].color = 0
+        balls[index].score = 0
+        bombBallTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(animateBombBall), userInfo: nil, repeats: true)
+    }
+
+    func locateBombLocation() -> Int {
+        for ii in 0..<(ROWS * COLUMNS) {
+            if (balls[ii].type == .BOMB) {
+                return ii
+            }
+        }
+        return 0
+    }
+
+    func explodeBombBall(_ bombLocation: Int) {
+        if ((bombLocation % 4 > 0 && bombLocation % 4 < 3) && (bombLocation > COLUMNS - 1 && bombLocation < ROWS * COLUMNS - COLUMNS)) {
+            GridView.clearBall(bombLocation - COLUMNS - 1)
+            GridView.clearBall(bombLocation - COLUMNS)
+            GridView.clearBall(bombLocation - COLUMNS + 1)
+            GridView.clearBall(bombLocation - COLUMNS + 3)
+            GridView.clearBall(bombLocation + 1)
+            GridView.clearBall(bombLocation + 3)
+            GridView.clearBall(bombLocation + COLUMNS)
+            GridView.clearBall(bombLocation + COLUMNS + 1)
+        } else if (bombLocation % COLUMNS == 0) {
+            GridView.clearBall(bombLocation - COLUMNS)
+            GridView.clearBall(bombLocation - COLUMNS + 1)
+            GridView.clearBall(bombLocation + 1)
+            GridView.clearBall(bombLocation + COLUMNS)
+            GridView.clearBall(bombLocation + COLUMNS + 1)
+        } else if (bombLocation % COLUMNS == COLUMNS - 1) {
+            GridView.clearBall(bombLocation - COLUMNS)
+            GridView.clearBall(bombLocation - COLUMNS - 1)
+            GridView.clearBall(bombLocation - 1)
+            GridView.clearBall(bombLocation + COLUMNS - 1)
+            GridView.clearBall(bombLocation + COLUMNS)
+        } else if (bombLocation > 0 && bombLocation < COLUMNS - 1) {
+            GridView.clearBall(bombLocation - 1)
+            GridView.clearBall(bombLocation + 1)
+            GridView.clearBall(bombLocation + COLUMNS - 1)
+            GridView.clearBall(bombLocation + COLUMNS)
+            GridView.clearBall(bombLocation + COLUMNS + 1)
+        } else if (bombLocation > ROWS * (COLUMNS - 1) && bombLocation < ROWS * COLUMNS - 1) {
+            GridView.clearBall(bombLocation - 1)
+            GridView.clearBall(bombLocation - COLUMNS - 1)
+            GridView.clearBall(bombLocation - COLUMNS)
+            GridView.clearBall(bombLocation - COLUMNS + 1)
+            GridView.clearBall(bombLocation + 1)
+        } else if (bombLocation == 0) {
+            GridView.clearBall(bombLocation + 1)
+            GridView.clearBall(bombLocation + COLUMNS)
+            GridView.clearBall(bombLocation + COLUMNS + 1)
+        } else if (bombLocation == COLUMNS - 1) {
+            GridView.clearBall(bombLocation - 1)
+            GridView.clearBall(bombLocation + COLUMNS)
+            GridView.clearBall(bombLocation + COLUMNS - 1)
+        } else if (bombLocation == (ROWS * COLUMNS) - COLUMNS) {
+            GridView.clearBall(bombLocation + 1)
+            GridView.clearBall(bombLocation - COLUMNS)
+            GridView.clearBall(bombLocation - COLUMNS + 1)
+        } else if (bombLocation == ROWS * COLUMNS - 1) {
+            GridView.clearBall(bombLocation - 1)
+            GridView.clearBall(bombLocation - COLUMNS)
+            GridView.clearBall(bombLocation - COLUMNS - 1)
+        }
+    }
+
+    @objc func animateBombBall() {
+        let index = locateBombLocation()
+
+        secondsUntilExplode -= 1;
+        if (secondsUntilExplode == 0) {
+            secondsUntilExplode = 10
+            explodeBombBall(index)
+            GridView.clearBall(index)
+            bombBallTimer?.invalidate()
+            bombBallTimer = nil
+        }
+        setNeedsDisplay()
     }
 
     func incrementBallSwipes() {
@@ -604,6 +688,11 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
         let center = CGPoint(x: xx + xx_stride / 2, y: yy + yy_stride / 2)
         let radius = CGFloat(xx_stride / 2)
 
+        let textAttributes = [
+            NSAttributedString.Key.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
+            NSAttributedString.Key.foregroundColor : UIColor.white
+        ]
+
         switch type {
         case .ROCK:
             var arc = UIBezierPath()
@@ -627,11 +716,6 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                 color[colors] |= 0x0000ff
                 colors += 1
             }
-
-            let textAttributes = [
-                NSAttributedString.Key.font : UIFont.systemFont(ofSize: CGFloat(FONT_H / 2)),
-                NSAttributedString.Key.foregroundColor : UIColor.white
-            ]
 
             if colors == 1 {
                 var arc = UIBezierPath()
@@ -676,6 +760,20 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
                 UIColor(hex: color[2]).set()
                 arc3.fill()
             }
+        case .BOMB:
+            var arc = UIBezierPath()
+            arc = UIBezierPath(ovalIn: CGRect(x: xx, y: yy, width: xx_stride, height: yy_stride))
+
+            if secondsUntilExplode <= 3 {
+                UIColor.red.set()
+            } else {
+                UIColor.yellow.set()
+            }
+            arc.stroke()
+            arc.fill()
+
+            let text_width = Double(String(secondsUntilExplode).size(withAttributes: textAttributes).width)
+            String(secondsUntilExplode).draw(at: CGPoint(x: xx + xx_stride / 2 - text_width / 2, y: yy + yy_stride / 2 - FONT_H / 4), withAttributes: textAttributes)
         }
     }
 
@@ -730,9 +828,11 @@ class GridView: UIView, ModalHandler, UIPopoverPresentationControllerDelegate {
 
                 count += 1
                 if (count == MAX_NEW_BALLS) { break }
-                else if (numberOfMoves % 10 == 0) {
-                    addRockBall()
+                else if (numberOfMoves % 20 == 0) {
+                    addRockBall(start)
                     break
+                } else if (numberOfMoves % 10 == 0) {
+                    addBombBall(start)
                 }
             }
             start += 7

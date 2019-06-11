@@ -132,25 +132,25 @@
          contextName = "GridView.drawBalls():GridView.swift">
          <PersistentStrings>
             <PersistentString
-               value = "Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)">
-            </PersistentString>
-            <PersistentString
-               value = "Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))">
-            </PersistentString>
-            <PersistentString
-               value = "((ii / COLUMNS) % ROWS) * Int(y_stride)">
-            </PersistentString>
-            <PersistentString
                value = "balls[ii].type">
             </PersistentString>
             <PersistentString
-               value = "Double(COLUMNS)">
+               value = "Double(ii).truncatingRemainder(dividingBy: Double(COLUMNS))">
             </PersistentString>
             <PersistentString
                value = "((Double(ii) / Double(COLUMNS))).truncatingRemainder(dividingBy: Double(ROWS)) * y_stride">
             </PersistentString>
             <PersistentString
                value = "Double(ii)">
+            </PersistentString>
+            <PersistentString
+               value = "Double(COLUMNS)">
+            </PersistentString>
+            <PersistentString
+               value = "((ii / COLUMNS) % ROWS) * Int(y_stride)">
+            </PersistentString>
+            <PersistentString
+               value = "Y_OFF + (iiDivideColumns.truncatingRemainder(dividingBy: Double(ROWS)) * y_stride)">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -237,6 +237,9 @@
          contextName = "GridView.drawBall(_:coordinates:color:):GridView.swift">
       </ContextState>
       <ContextState
+         contextName = "GridView.animateBombBall():GridView.swift">
+      </ContextState>
+      <ContextState
          contextName = "GridView.onSwipeLeft():GridView.swift">
          <PersistentStrings>
             <PersistentString
@@ -244,6 +247,14 @@
             </PersistentString>
             <PersistentString
                value = "balls[last].score">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "GridView.addRandomBall():GridView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "numberofmoves">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

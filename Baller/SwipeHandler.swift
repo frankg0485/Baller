@@ -115,6 +115,8 @@ class SwipeHandler {
                     case .NORMAL:
                         mergeMultiColor(idx1: rightIndex, idx2: rightIndex - 1, defaultIdx: rightIndex - 1)
                     case .ROCK:
+                        fallthrough
+                    case .BOMB:
                         break
                     }
                 }
@@ -175,6 +177,8 @@ class SwipeHandler {
                     case .NORMAL:
                         mergeMultiColor(idx1: leftIndex, idx2: leftIndex + 1, defaultIdx: leftIndex + 1)
                     case .ROCK:
+                        fallthrough
+                    case .BOMB:
                         break
                     }
                 }
@@ -235,6 +239,8 @@ class SwipeHandler {
                     case .NORMAL:
                         mergeMultiColor(idx1: bottomIndex, idx2: bottomIndex - COLUMNS, defaultIdx: bottomIndex - COLUMNS)
                     case .ROCK:
+                        fallthrough
+                    case .BOMB:
                         break
                     }
                 }
@@ -295,6 +301,8 @@ class SwipeHandler {
                     case .NORMAL:
                         mergeMultiColor(idx1: topIndex, idx2: topIndex + COLUMNS, defaultIdx: topIndex + COLUMNS)
                     case .ROCK:
+                        fallthrough
+                    case .BOMB:
                         break
                     }
                 }
